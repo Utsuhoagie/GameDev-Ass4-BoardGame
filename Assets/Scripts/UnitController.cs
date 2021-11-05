@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Side = GameController.Side;
+
 public class UnitController : MonoBehaviour
 {
     // References
@@ -14,7 +16,6 @@ public class UnitController : MonoBehaviour
     public Sprite red_villager, red_warrior, red_armor, red_archer;
 
     // Gameplay
-    enum Side { RED, BLUE }
     private Side side;
     bool isChosen = false;
 
@@ -133,9 +134,15 @@ public class UnitController : MonoBehaviour
 
     private void OnMouseUp()
     {
-        this.destroyMovableTile();
+        if (!this.controller.GetComponent<GameController>().isGameEnd() &&
+            this.controller.GetComponent<GameController>().getCurPlayer() == this.side)
+        {
+            this.destroyMovableTile();
 
-        this.initMovePlates();
+            this.initMovePlates();
+        }
+
+
     }
 
 

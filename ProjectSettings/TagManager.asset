@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - MovableTile
+  - LeftText
+  - RightText
   layers:
   - Default
   - TransparentFX

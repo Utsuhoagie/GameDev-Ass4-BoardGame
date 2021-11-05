@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
+using Side = GameController.Side;
 
 public class MovableTile : MonoBehaviour
 {
@@ -53,6 +56,14 @@ public class MovableTile : MonoBehaviour
         controller.GetComponent<GameController>().SetUnitAt(x, y, this.unit);
 
         this.unit.GetComponent<UnitController>().destroyMovableTile();
+
+        // switch player
+        this.controller.GetComponent<GameController>().nextTurn();
+
+        // show text
+        Side curPlayer = this.controller.GetComponent<GameController>().getCurPlayer();
+        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().enabled = true;
+        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().text = $"{curPlayer} Turn";
     }
 
     public void setUnitOwnMovableTile(GameObject obj)

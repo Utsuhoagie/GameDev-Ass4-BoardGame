@@ -1,13 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
 
     // Turn
-    enum Side { RED, BLUE }
-    private Side curPlayer;
+    public enum Side { RED, BLUE }
+    [SerializeField] private Side curPlayer;
     private bool isGameOver = false;
 
     private GameObject[,] boardPos = new GameObject[8, 8];
@@ -21,6 +23,10 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // show text
+        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().enabled = true;
+        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().text = $"{this.curPlayer} Turn";
+
         //unitObj.name = "blu_villager";
         CreateUnit("blue_villager", 0, 0);
         CreateUnit("blue_archer", 3, 3);
@@ -34,7 +40,12 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isGameOver && Input.GetMouseButtonDown(0))
+        {
+            this.isGameOver = false;
 
+            SceneManager.LoadScene("Game");
+        }
     }
 
     // --------------------------------
@@ -86,5 +97,35 @@ public class GameController : MonoBehaviour
     public void setPositionEmpty(int x, int y)
     {
         boardPos[x, y] = null;
+    }
+
+    public Side getCurPlayer()
+    {
+        return this.curPlayer;
+    }
+
+    public bool isGameEnd()
+    {
+        return this.isGameOver;
+    }
+
+    public void nextTurn()
+    {
+        if (this.curPlayer == Side.RED)
+        {
+            this.curPlayer = Side.BLUE;
+        }
+        else
+        {
+            this.curPlayer = Side.RED;
+        }
+    }
+
+    public void endGame(Side winner)
+    {
+        this.isGameOver = true;
+
+        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().enabled = true;
+        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().text = $"{winner} wins!";
     }
 }
