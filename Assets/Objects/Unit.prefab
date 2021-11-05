@@ -72,7 +72,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
-  moveRange: {fileID: 0}
+  movableTile: {fileID: 5464851485136303008, guid: 07639947604068d42a1c85c585a1a088,
+    type: 3}
   blue_villager: {fileID: 4797342183861242245, guid: 32463f6a479611244b81c72ffc0a69e6,
     type: 3}
   blue_warrior: {fileID: -5686476317536195842, guid: 32463f6a479611244b81c72ffc0a69e6,
