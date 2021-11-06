@@ -3,47 +3,61 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class GameController : MonoBehaviour
 {
+    // References
+    Text blueText;
+    Text redText;
 
     // Turn
-    public enum Side { RED, BLUE }
+    public enum Side { BLUE, RED }
     [SerializeField] private Side curPlayer;
-    private bool isGameOver = false;
+    bool isGameOver = false;
 
-    private GameObject[,] boardPos = new GameObject[8, 8];
-    private List<GameObject> redUnits = new List<GameObject>();
-    private List<GameObject> blueUnits = new List<GameObject>();
 
+    GameObject[,] boardPos = new GameObject[8, 8];
+    List<GameObject> blueUnits = new List<GameObject>();
+    List<GameObject> redUnits = new List<GameObject>();
+
+    
     public GameObject unitPrefab;
 
+    // --- Getters & Setters ------------------
+    public GameObject GetUnitAt(int x, int y) { return boardPos[x, y]; }
 
-    // ---------------------------------
-    // Start is called before the first frame update
+    public void SetUnitAt(int x, int y, GameObject unit) { boardPos[x, y] = unit; }
+
+    public void setPositionEmpty(int x, int y) { boardPos[x, y] = null; }
+
+    public Side getCurPlayer() { return this.curPlayer; }
+
+    // --- Main --------------------------
+    // Awake is called FIRST
+    void Awake() {
+        curPlayer = Side.BLUE;
+        blueText = GameObject.FindWithTag("BlueText").GetComponent<Text>();
+        redText = GameObject.FindWithTag("RedText").GetComponent<Text>();
+    }
+
     void Start()
     {
         // show text
-        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().enabled = true;
-        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().text = $"{this.curPlayer} Turn";
+        blueText.enabled = true;
+        redText.enabled = false;
 
-        //unitObj.name = "blu_villager";
-        CreateUnit("blue_villager", 0, 0);
-        CreateUnit("blue_archer", 3, 3);
-        CreateUnit("red_warrior", 1, 1);
-        CreateUnit("red_armor", 2, 2);
-
-        // for (int i = 0; i < 4; i++)
-        //     Debug.Log($"BoardPos({i},{i}) has: bbbbbbb {boardPos[i,i]} bbbbbbbbbbbb");
+        CreateUnit("blue_villager", 2, 6);
+        CreateUnit("blue_archer", 3, 5);
+        CreateUnit("red_warrior", 5, 3);
+        CreateUnit("red_armor", 6, 2);
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (isGameOver && Input.GetMouseButtonDown(0))
         {
             this.isGameOver = false;
-
             SceneManager.LoadScene("Game");
         }
     }
@@ -53,79 +67,83 @@ public class GameController : MonoBehaviour
     void CreateUnit(string uName, int x, int y)
     {
         // world position, NOT board position
-        var pos = new Vector3(x - 3.5f, y - 3.5f, -1);
+        var pos = new Vector3(x, y, -1);
 
-        GameObject unitObj = Instantiate(unitPrefab, pos, Quaternion.identity);
-        UnitController unit = unitObj.GetComponent<UnitController>();
-        unit.name = uName;
+        GameObject unit = Instantiate(unitPrefab, pos, Quaternion.identity);
+        UnitController uC = unit.GetComponent<UnitController>();
+        uC.name = uName;
 
-        // make positions start at (0,0) at bottom left
-        unit.SetX((int)(pos.x + 3.5f));
-        unit.SetY((int)(pos.y + 3.5f));
+        uC.SetX((int)(pos.x));
+        uC.SetY((int)(pos.y));
 
-        unit.Activate();
+        uC.Activate();
 
-        if (unit.isRed())
-        {
-            redUnits.Add(unitObj);
-        }
+        if (uC.isRed())
+            redUnits.Add(unit);
         else
-        {
-            blueUnits.Add(unitObj);
+            blueUnits.Add(unit);
+
+        boardPos[uC.GetX(), uC.GetY()] = unit;
+    }
+
+    // --- Turns & Game -----------------
+
+    public void SetAllMovable(bool movable, bool isRed) {
+        if (isRed) {
+            foreach (GameObject redUnit in redUnits)
+                redUnit.GetComponent<UnitController>().SetMovable(movable);
         }
-
-        boardPos[unit.GetX(), unit.GetY()] = unitObj;
+        else {
+            foreach (GameObject blueUnit in blueUnits)
+                blueUnit.GetComponent<UnitController>().SetMovable(movable);
+        }
     }
 
-    public bool isValidPos(int x, int y)
+    public void StartBlueTurn()
     {
-        if (x < 0 || y < 0 || x >= 8 || y >= 8)
-            return false;
-        else return true;
-    }
+        if (curPlayer == Side.RED) {
+            SetAllMovable(true, true);
 
-    public GameObject GetUnitAt(int x, int y)
-    {
-        return boardPos[x, y];
-    }
-
-    public void SetUnitAt(int x, int y, GameObject unit)
-    {
-        boardPos[x, y] = unit;
-    }
-
-    public void setPositionEmpty(int x, int y)
-    {
-        boardPos[x, y] = null;
-    }
-
-    public Side getCurPlayer()
-    {
-        return this.curPlayer;
-    }
-
-    public bool isGameEnd()
-    {
-        return this.isGameOver;
-    }
-
-    public void nextTurn()
-    {
-        if (this.curPlayer == Side.RED)
-        {
             this.curPlayer = Side.BLUE;
-        }
-        else
-        {
-            this.curPlayer = Side.RED;
+            blueText.enabled = true;
+            redText.enabled = false;
+
+            foreach (GameObject blueUnit in blueUnits)
+                blueUnit.GetComponent<UnitController>().SetMovable(true);
         }
     }
+
+    public void StartRedTurn()
+    {
+        if (curPlayer == Side.BLUE) {
+            SetAllMovable(true, false);
+
+            this.curPlayer = Side.RED;
+            redText.enabled = true;
+            blueText.enabled = false;
+
+            foreach (GameObject redUnit in redUnits)
+                redUnit.GetComponent<UnitController>().SetMovable(true);
+        }
+    }
+
+    public bool isGameEnd() { return this.isGameOver; }
 
     public void endGame(Side winner)
     {
         this.isGameOver = true;
 
+        // TODO:
         GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().enabled = true;
         GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().text = $"{winner} wins!";
+    }
+
+
+    // --- Helpers ---------------
+    public bool isValidPos(int x, int y)
+    {
+        if (x < 0 || y < 0 || x >= 8 || y >= 8)
+            return false;
+        else return true;
     }
 }

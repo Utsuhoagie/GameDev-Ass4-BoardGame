@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 4295031534396347664}
   - component: {fileID: 2312967403001159171}
   m_Layer: 0
-  m_Name: MovableTile
-  m_TagString: MovableTile
+  m_Name: MoveTile
+  m_TagString: MoveTile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -95,8 +95,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf43d0f8e4863a4cb6bd2fc536cf8a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controller: {fileID: 0}
-  isAttack: 0
+  game: {fileID: 0}
 --- !u!61 &2312967403001159171
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -7,9 +7,11 @@ using Side = GameController.Side;
 public class UnitController : MonoBehaviour
 {
     // References
-    public GameObject controller;
-    public GameObject movableTile;
+    public GameObject game;
+    GameController gC;
     Collider2D col;
+    SpriteRenderer spRend;
+    public GameObject MoveTile;
 
     // References to unit sprites
     public Sprite blue_villager, blue_warrior, blue_armor, blue_archer;
@@ -18,31 +20,25 @@ public class UnitController : MonoBehaviour
     // Gameplay
     private Side side;
     bool isChosen = false;
+    bool isMovable = false;
 
     // Stats
-    private int HP = 10;
+    int HP = 100;
+    int move;
 
     // Positions
-    private int x;
-    private int y;
+    int x;
+    int y;
 
-    // -----------------------------------
-    // Getters & Setters
-
+    // --- Getters & Setters ------------------
     public int GetX() { return x; }
     public int GetY() { return y; }
-    public void SetX(int _x)
-    {
-        x = _x;
-    }
-    public void SetY(int _y)
-    {
-        y = _y;
-    }
+    public void SetX(int _x) { x = _x; }
+    public void SetY(int _y) { y = _y; }
 
-    public void updatePositionOnMap()
+    public void UpdatePos()
     {
-        var pos = new Vector3(this.x - 3.5f, this.y - 3.5f, -1);
+        var pos = new Vector3(x, y, -1);
 
         this.transform.position = pos;
     }
@@ -50,107 +46,31 @@ public class UnitController : MonoBehaviour
     public int GetHP() { return HP; }
     public void SetHP(int _HP) { HP = _HP; }
 
+    public void SetMovable(bool movable) { 
+        isMovable = movable;
+
+        if (isMovable) {
+            spRend.color = Color.white;
+        }
+        else {
+            spRend.color = Color.gray;
+        }
+    }
+
     public bool isRed() { return side == Side.RED; }
 
-    public void destroyMovableTile()
-    {
-        GameObject[] movePlates = GameObject.FindGameObjectsWithTag("MovableTile");
-        for (int i = 0; i < movePlates.Length; i++)
-        {
-            Destroy(movePlates[i]);
-        }
-    }
-
-    public void initMovePlates()
-    {
-        switch (this.name)
-        {
-            default:
-                drawMovableTiles();
-                break;
-        }
-    }
-
-    private void drawMovableTiles()
-    {
-        var move = 2;
-
-        GameController gC = this.controller.GetComponent<GameController>();
-
-        for (int i = 1; i <= move; i++)
-        {
-            // draw left
-            if (gC.isValidPos(this.x - i, this.y) && gC.GetUnitAt(this.x - i, this.y) == null)
-            {
-                drawMovableTile(this.x - i, this.y);
-            }
-            // draw up
-            if (gC.isValidPos(this.x + i, this.y) && gC.GetUnitAt(this.x + i, this.y) == null)
-            {
-                drawMovableTile(this.x + i, this.y);
-            }
-            // draw right
-            if (gC.isValidPos(this.x, this.y + i) && gC.GetUnitAt(this.x, this.y + i) == null)
-            {
-                drawMovableTile(this.x, this.y + i);
-            }
-            // draw down
-            if (gC.isValidPos(this.x, this.y - i) && gC.GetUnitAt(this.x, this.y - i) == null)
-            {
-                drawMovableTile(this.x, this.y - i);
-            }
-
-            // draw diagonal left top
-            if (i >= 2 && gC.isValidPos(this.x - (i - 1), this.y + (i - 1)) && gC.GetUnitAt(this.x - (i - 1), this.y + (i - 1)) == null)
-            {
-                drawMovableTile(this.x - (i - 1), this.y + (i - 1));
-            }
-            // draw diagonal right top
-            if (i >= 2 && gC.isValidPos(this.x + (i - 1), this.y + (i - 1)) && gC.GetUnitAt(this.x + (i - 1), this.y + (i - 1)) == null)
-            {
-                drawMovableTile(this.x + (i - 1), this.y + (i - 1));
-            }
-            // draw diagonal left bot
-            if (i >= 2 && gC.isValidPos(this.x - (i - 1), this.y - (i - 1)) && gC.GetUnitAt(this.x - (i - 1), this.y - (i - 1)) == null)
-            {
-                drawMovableTile(this.x - (i - 1), this.y - (i - 1));
-            }
-            // draw diagonal right bot
-            if (i >= 2 && gC.isValidPos(this.x + (i - 1), this.y - (i - 1)) && gC.GetUnitAt(this.x + (i - 1), this.y - (i - 1)) == null)
-            {
-                drawMovableTile(this.x + (i - 1), this.y - (i - 1));
-            }
-        }
-    }
-
-    private void drawMovableTile(int x, int y)
-    {
-        GameObject mP = Instantiate(this.movableTile, new Vector3(x - 3.5f, y - 3.5f, -3.0f), Quaternion.identity);
-
-        MovableTile mT = mP.GetComponent<MovableTile>();
-        mT.setUnitOwnMovableTile(this.gameObject);
-        mT.setWorldPosition(x, y);
-    }
-
-    private void OnMouseUp()
-    {
-        if (!this.controller.GetComponent<GameController>().isGameEnd() &&
-            this.controller.GetComponent<GameController>().getCurPlayer() == this.side)
-        {
-            this.destroyMovableTile();
-
-            this.initMovePlates();
-        }
-
-
-    }
-
-
     // -----------------------------------
-    // Start is called before the first frame update
+    // Awake is called FIRST
+    void Awake() {
+        game = GameObject.FindWithTag("GameController");
+        gC = game.GetComponent<GameController>();
+        col = GetComponent<Collider2D>();
+        spRend = GetComponent<SpriteRenderer>();
+    }
+
     void Start()
     {
-        col = GetComponent<Collider2D>();
+
     }
 
     public void HandleInput()
@@ -159,69 +79,140 @@ public class UnitController : MonoBehaviour
         {
             Touch touch = Input.touches[0];
             Vector2 touchPos = (Vector2)Camera.main.ScreenToWorldPoint(touch.position);
-            // Ray ray = Camera.main.ScreenPointToRay(Input.touches[0].position);
-            // RaycastHit2D raycastInfo;
 
             if (col == Physics2D.OverlapPoint(touchPos))
             {
                 isChosen = true;
-                //GetComponent<SpriteRenderer>().flipX = true;
             }
             else
             {
                 isChosen = false;
-                //GetComponent<SpriteRenderer>().flipX = false;
             }
+        }
+    }
+
+    private void OnMouseUp()
+    {
+        if (!gC.isGameEnd() &&
+            gC.getCurPlayer() == this.side && this.isMovable)
+        {
+            this.destroyTiles();
+
+            this.initMovePlates();
         }
     }
 
     public void Activate()
     {
-        controller = GameObject.FindWithTag("GameController");
-
+        this.isMovable = true;
+        
         switch (this.name)
         {
             case "blue_villager":
-                this.GetComponent<SpriteRenderer>().sprite = blue_villager;
+                spRend.sprite = blue_villager;
                 side = Side.BLUE;
                 break;
             case "blue_warrior":
-                this.GetComponent<SpriteRenderer>().sprite = blue_warrior;
+                spRend.sprite = blue_warrior;
                 side = Side.BLUE;
                 break;
             case "blue_armor":
-                this.GetComponent<SpriteRenderer>().sprite = blue_armor;
+                spRend.sprite = blue_armor;
                 side = Side.BLUE;
                 break;
             case "blue_archer":
-                this.GetComponent<SpriteRenderer>().sprite = blue_archer;
+                spRend.sprite = blue_archer;
                 side = Side.BLUE;
                 break;
             case "red_villager":
-                this.GetComponent<SpriteRenderer>().sprite = red_villager;
+                spRend.sprite = red_villager;
                 side = Side.RED;
                 break;
             case "red_warrior":
-                this.GetComponent<SpriteRenderer>().sprite = red_warrior;
+                spRend.sprite = red_warrior;
                 side = Side.RED;
                 break;
             case "red_armor":
-                this.GetComponent<SpriteRenderer>().sprite = red_armor;
+                spRend.sprite = red_armor;
                 side = Side.RED;
                 break;
             case "red_archer":
-                this.GetComponent<SpriteRenderer>().sprite = red_archer;
+                spRend.sprite = red_archer;
                 side = Side.RED;
                 break;
         }
 
-        //Debug.Log($"{name} is at {transform.position} or X,Y = ({x},{y})");
+        if (spRend.sprite == red_villager || spRend.sprite == blue_villager)
+            move = 3;
+        else
+            move = 2;
     }
 
-
-    // Update is called once per frame
     void Update()
     {
         // HandleInput();
+    }
+
+
+    // ---- Tiles ---------------------------
+
+    public void initMovePlates()
+    {
+        switch (this.name)
+        {
+            default:
+                drawMoveTiles();
+                break;
+        }
+    }
+
+    private void drawMoveTiles()
+    {
+        // TODO: CHANGE WITH FLOOD FILL!!!!
+        for (int i = 1; i <= move; i++)
+        {
+            // draw left
+            if (gC.isValidPos(x - i, y) && gC.GetUnitAt(x - i, y) == null)
+                drawMoveTile(x - i, y);
+            // draw up
+            if (gC.isValidPos(x + i, y) && gC.GetUnitAt(x + i, y) == null)
+                drawMoveTile(x + i, y);
+            // draw right
+            if (gC.isValidPos(x, y + i) && gC.GetUnitAt(x, y + i) == null)
+                drawMoveTile(x, y + i);
+            // draw down
+            if (gC.isValidPos(x, y - i) && gC.GetUnitAt(x, y - i) == null)
+                drawMoveTile(x, y - i);
+
+            // draw diagonal left top
+            if (i >= 2 && gC.isValidPos(x - (i - 1), y + (i - 1)) && gC.GetUnitAt(x - (i - 1), y + (i - 1)) == null)
+                drawMoveTile(x - (i - 1), y + (i - 1));
+            // draw diagonal right top
+            if (i >= 2 && gC.isValidPos(x + (i - 1), y + (i - 1)) && gC.GetUnitAt(x + (i - 1), y + (i - 1)) == null)
+                drawMoveTile(x + (i - 1), y + (i - 1));
+            // draw diagonal left bot
+            if (i >= 2 && gC.isValidPos(x - (i - 1), y - (i - 1)) && gC.GetUnitAt(x - (i - 1), y - (i - 1)) == null)
+                drawMoveTile(x - (i - 1), y - (i - 1));
+            // draw diagonal right bot
+            if (i >= 2 && gC.isValidPos(x + (i - 1), y - (i - 1)) && gC.GetUnitAt(x + (i - 1), y - (i - 1)) == null)
+                drawMoveTile(x + (i - 1), y - (i - 1));
+        }
+    }
+
+    private void drawMoveTile(int x, int y)
+    {
+        GameObject mP = Instantiate(this.MoveTile, new Vector3(x, y, -3.0f), Quaternion.identity);
+
+        MoveTile mT = mP.GetComponent<MoveTile>();
+        mT.setUnitOwnMoveTile(this.gameObject);
+        mT.setWorldPosition(x, y);
+    }
+
+
+    public void destroyTiles()
+    {
+        GameObject[] mvTiles = GameObject.FindGameObjectsWithTag("MoveTile");//"MvTile");
+        for (int i = 0; i < mvTiles.Length; i++)
+            Destroy(mvTiles[i]);
     }
 }
