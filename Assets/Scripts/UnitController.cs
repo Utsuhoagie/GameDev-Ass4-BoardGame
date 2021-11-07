@@ -52,6 +52,7 @@ public class UnitController : MonoBehaviour
     }
 
     public UType GetUType() { return this.unitType; }
+    public int GetAtkRange() { return this.range; }
 
     public int GetHP() { return HP; }
     public void SetHP(int _HP) { 
@@ -63,10 +64,12 @@ public class UnitController : MonoBehaviour
     public void SetState(State _state) { 
         state = _state;
 
-        if (state != State.END)
-            spRend.color = Color.white;
+        if (state == State.END)
+            spRend.color = new Color(0.4f, 0.4f, 0.4f, 1.0f);
+        else if (state == State.MOVED)
+            spRend.color = new Color(0.8f, 0.8f, 0.8f, 1.0f);
         else
-            spRend.color = Color.gray;
+            spRend.color = Color.white;
 
         if (state == State.MOVED)
             drawAtkTiles();
@@ -198,6 +201,10 @@ public class UnitController : MonoBehaviour
         }
     }
 
+    public void Die() {
+        //Debug.Log($"{this.name} died!");
+        Destroy(this.gameObject);
+    }
 
     // ---- Tiles ---------------------------
 
@@ -255,30 +262,28 @@ public class UnitController : MonoBehaviour
     private void drawAtkTiles()
     {
 
-        if (this.range == 1) {
-            // draw left
-            if (gC.isValidPos(x - 1, y) && 
-                gC.GetUnitAt(x - 1, y) != null && 
-                !isSameSide(gC.GetUnitAt(x - 1, y).GetComponent<UnitController>()))
-                drawAtkTile(x - 1, y);
-            // draw up
-            if (gC.isValidPos(x + 1, y) && 
-                gC.GetUnitAt(x + 1, y) != null &&
-                !isSameSide(gC.GetUnitAt(x + 1, y).GetComponent<UnitController>()))
-                drawAtkTile(x + 1, y);
-            // draw right
-            if (gC.isValidPos(x, y + 1) && 
-                gC.GetUnitAt(x, y + 1) != null &&
-                !isSameSide(gC.GetUnitAt(x, y + 1).GetComponent<UnitController>()))
-                drawAtkTile(x, y + 1);
-            // draw down
-            if (gC.isValidPos(x, y - 1) && 
-                gC.GetUnitAt(x, y - 1) != null &&
-                !isSameSide(gC.GetUnitAt(x, y - 1).GetComponent<UnitController>()))
-                drawAtkTile(x, y - 1);
-        }
+        // draw left
+        if (gC.isValidPos(x - this.range, y) && 
+            gC.GetUnitAt(x - this.range, y) != null && 
+            !isSameSide(gC.GetUnitAt(x - this.range, y).GetComponent<UnitController>()))
+            drawAtkTile(x - this.range, y);
+        // draw up
+        if (gC.isValidPos(x + this.range, y) && 
+            gC.GetUnitAt(x + this.range, y) != null &&
+            !isSameSide(gC.GetUnitAt(x + this.range, y).GetComponent<UnitController>()))
+            drawAtkTile(x + this.range, y);
+        // draw right
+        if (gC.isValidPos(x, y + this.range) && 
+            gC.GetUnitAt(x, y + this.range) != null &&
+            !isSameSide(gC.GetUnitAt(x, y + this.range).GetComponent<UnitController>()))
+            drawAtkTile(x, y + this.range);
+        // draw down
+        if (gC.isValidPos(x, y - this.range) && 
+            gC.GetUnitAt(x, y - this.range) != null &&
+            !isSameSide(gC.GetUnitAt(x, y - this.range).GetComponent<UnitController>()))
+            drawAtkTile(x, y - this.range);
 
-        else if (this.range == 2) {
+        if (this.range == 2) {
             // draw diagonal left top
             if (gC.isValidPos(x - 1, y + 1) &&
                 gC.GetUnitAt(x - 1, y + 1) != null &&

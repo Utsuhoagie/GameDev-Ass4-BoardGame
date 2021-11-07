@@ -14,6 +14,7 @@ public class CombatController : MonoBehaviour
     };
 
     public void Attack(UnitController attacker, UnitController defender) {
+        // attack
         int aHP = attacker.GetHP();
         int dHP = defender.GetHP();
 
@@ -24,6 +25,20 @@ public class CombatController : MonoBehaviour
         int atkDmg = (int) (baseDmg * HP_modifier * def_modifier);
         defender.SetHP(dHP - atkDmg);
 
-        
+        if (defender.GetHP() <= 0)
+            defender.Die();
+        else {
+            // counterattack
+            if (defender.GetAtkRange() == attacker.GetAtkRange()) {
+                dHP = defender.GetHP();
+
+                baseDmg = damage[(int)defender.GetUType(), (int)attacker.GetUType()];
+                HP_modifier = (float)dHP / 100;
+                def_modifier = 1.0f - 0.0f;
+
+                int defDmg = (int) (baseDmg * HP_modifier * def_modifier);
+                attacker.SetHP(aHP - defDmg);
+            }
+        }
     }
 }

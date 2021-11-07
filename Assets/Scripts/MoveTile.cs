@@ -59,7 +59,7 @@ public class MoveTile : MonoBehaviour
 
         gC.SetUnitAt(x, y, this.unit);
 
-        gC.SetAllState(uC.GetSide(), State.END);
+        //gC.SetAllState(uC.GetSide(), State.END);
         uC.SetState(State.MOVED);
 
         

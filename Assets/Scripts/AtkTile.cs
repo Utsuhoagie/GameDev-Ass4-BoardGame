@@ -54,8 +54,8 @@ public class AtkTile : MonoBehaviour
 
         combat.Attack(attacker, defender);
 
-
-        gC.SetAllState(uC.GetSide(), State.END);
+        uC.SetState(State.END);
+        //gC.SetAllState(uC.GetSide(), State.END);
     }
 
 
