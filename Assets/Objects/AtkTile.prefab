@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5464851485136303014}
   - component: {fileID: 5464851485136303015}
-  - component: {fileID: 4295031534396347664}
   - component: {fileID: 2312967403001159171}
+  - component: {fileID: -37189907853016836}
   m_Layer: 0
   m_Name: AtkTile
   m_TagString: AtkTile
@@ -83,19 +83,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4295031534396347664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5464851485136303008}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: caf43d0f8e4863a4cb6bd2fc536cf8a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  game: {fileID: 0}
 --- !u!61 &2312967403001159171
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -122,3 +109,16 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &-37189907853016836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5464851485136303008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2609f18608815f24091e6ab4ebf57b58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  game: {fileID: 0}

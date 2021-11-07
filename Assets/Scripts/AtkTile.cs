@@ -4,12 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Side = GameController.Side;
+using State = UnitController.State;
 
 public class AtkTile : MonoBehaviour
 {
     public GameObject game;
     GameController gC;
-    GameObject unit;    // which unit "owns" this movable tile
+    GameObject unit;    // which unit "owns" this atk tile
     UnitController uC;
 
     int x;
@@ -17,7 +18,7 @@ public class AtkTile : MonoBehaviour
 
     // --- Getters & Setters -------------------
     public GameObject getCurrentlyUnitInUsed() { return unit; }
-    public void setUnitOwnMoveTile(GameObject obj) {
+    public void setUnitOwnAtkTile(GameObject obj) {
         unit = obj;
         uC = unit.GetComponent<UnitController>();
     }
@@ -29,42 +30,32 @@ public class AtkTile : MonoBehaviour
         gC = game.GetComponent<GameController>();
     }
 
-    void Start()
-    {
+    void Start() {}
 
-    }
-
-    void Update()
-    {
-
-    }
+    void Update() {}
 
     //-----------------------------------------
 
     public void OnMouseUp()
     {
         // TODO:
-        // if (this.isAttack)
-        // {
-        //     //? Destroy obj currently on pos if move to that pos
-        //     GameObject obj = gC.GetUnitAt(x, y);
-        //     Destroy(obj);
-        // }
+        // combat
 
-        //? move obj to pos
-        gC.setPositionEmpty(
-            uC.GetX(),
-            uC.GetY()
-        );
+        // uC.SetX(x);
+        // uC.SetY(y);
+        // uC.UpdatePos();
+        uC.destroyTiles("AtkTile");
 
-        uC.SetX(x);
-        uC.SetY(y);
-        uC.UpdatePos();
-        uC.destroyTiles();
-        //uC.SetMovable(false);
 
-        gC.SetUnitAt(x, y, this.unit);
-        gC.SetAllMovable(false, uC.isRed());
+        // COMBAT
+        CombatController combat = GameObject.FindWithTag("CombatController").GetComponent<CombatController>();
+        UnitController attacker = uC;
+        UnitController defender = gC.GetUnitAt(this.x, this.y).GetComponent<UnitController>();
+
+        combat.Attack(attacker, defender);
+
+
+        gC.SetAllState(uC.GetSide(), State.END);
     }
 
 

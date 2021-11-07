@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Side = GameController.Side;
+using State = UnitController.State;
 
 public class MoveTile : MonoBehaviour
 {
@@ -29,15 +30,9 @@ public class MoveTile : MonoBehaviour
         gC = game.GetComponent<GameController>();
     }
 
-    void Start()
-    {
+    void Start() {}
 
-    }
-
-    void Update()
-    {
-
-    }
+    void Update() {}
 
     //-----------------------------------------
 
@@ -60,11 +55,14 @@ public class MoveTile : MonoBehaviour
         uC.SetX(x);
         uC.SetY(y);
         uC.UpdatePos();
-        uC.destroyTiles();
-        //uC.SetMovable(false);
+        uC.destroyTiles("MoveTile");
 
         gC.SetUnitAt(x, y, this.unit);
-        gC.SetAllMovable(false, uC.isRed());
+
+        gC.SetAllState(uC.GetSide(), State.END);
+        uC.SetState(State.MOVED);
+
+        
     }
 
 

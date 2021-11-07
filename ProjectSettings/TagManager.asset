@@ -8,7 +8,7 @@ TagManager:
   - RedText
   - MoveTile
   - AtkTile
-  - MovableTile
+  - CombatController
   layers:
   - Default
   - TransparentFX

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using State = UnitController.State;
 
 public class GameController : MonoBehaviour
 {
@@ -47,10 +48,14 @@ public class GameController : MonoBehaviour
         blueText.enabled = true;
         redText.enabled = false;
 
-        CreateUnit("blue_villager", 2, 6);
-        CreateUnit("blue_archer", 3, 5);
-        CreateUnit("red_warrior", 5, 3);
-        CreateUnit("red_armor", 6, 2);
+        CreateUnit("blue_villager", 2, 4);
+        CreateUnit("blue_warrior", 3, 4);
+        CreateUnit("blue_armor", 4, 4);
+        CreateUnit("blue_archer", 5, 4);
+        CreateUnit("red_villager", 5, 2);
+        CreateUnit("red_warrior", 4, 2);
+        CreateUnit("red_armor", 3, 2);
+        CreateUnit("red_archer", 2, 2);
     }
 
     void Update()
@@ -78,52 +83,60 @@ public class GameController : MonoBehaviour
 
         uC.Activate();
 
-        if (uC.isRed())
-            redUnits.Add(unit);
-        else
+        if (uC.GetSide() == Side.BLUE)
             blueUnits.Add(unit);
+        else
+            redUnits.Add(unit);
 
         boardPos[uC.GetX(), uC.GetY()] = unit;
     }
 
     // --- Turns & Game -----------------
 
-    public void SetAllMovable(bool movable, bool isRed) {
-        if (isRed) {
-            foreach (GameObject redUnit in redUnits)
-                redUnit.GetComponent<UnitController>().SetMovable(movable);
-        }
-        else {
+    public void SetAllState(Side side, State state) {
+        if (side == Side.BLUE)
             foreach (GameObject blueUnit in blueUnits)
-                blueUnit.GetComponent<UnitController>().SetMovable(movable);
-        }
+                blueUnit.GetComponent<UnitController>().SetState(state);
+        else
+            foreach (GameObject redUnit in redUnits)
+                redUnit.GetComponent<UnitController>().SetState(state);
+
+    }
+
+    public void DestroyAllTiles(Side side) {
+        if (side == Side.BLUE)
+            foreach (GameObject blueUnit in blueUnits)
+                blueUnit.GetComponent<UnitController>().destroyTiles("Both");
+        else
+            foreach (GameObject blueUnit in blueUnits)
+                blueUnit.GetComponent<UnitController>().destroyTiles("Both");
     }
 
     public void StartBlueTurn()
     {
         if (curPlayer == Side.RED) {
-            SetAllMovable(true, true);
+            DestroyAllTiles(Side.RED);
+            SetAllState(Side.RED, State.WAIT);
 
             this.curPlayer = Side.BLUE;
             blueText.enabled = true;
             redText.enabled = false;
 
-            foreach (GameObject blueUnit in blueUnits)
-                blueUnit.GetComponent<UnitController>().SetMovable(true);
+            SetAllState(Side.BLUE, State.READY);
         }
     }
 
     public void StartRedTurn()
     {
         if (curPlayer == Side.BLUE) {
-            SetAllMovable(true, false);
+            DestroyAllTiles(Side.BLUE);
+            SetAllState(Side.BLUE, State.WAIT);
 
             this.curPlayer = Side.RED;
             redText.enabled = true;
             blueText.enabled = false;
 
-            foreach (GameObject redUnit in redUnits)
-                redUnit.GetComponent<UnitController>().SetMovable(true);
+            SetAllState(Side.RED, State.READY);
         }
     }
 
