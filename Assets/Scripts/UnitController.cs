@@ -13,6 +13,7 @@ public class UnitController : MonoBehaviour
     Collider2D col;
     SpriteRenderer spRend;
     GameObject textHP;
+    MapController mapCtrl;
 
     // References to unit sprites
     public Sprite blue_villager, blue_warrior, blue_armor, blue_archer;
@@ -64,7 +65,7 @@ public class UnitController : MonoBehaviour
     public void SetState(State _state) { 
         state = _state;
 
-        if (state == State.END)
+        if (state == State.END || this.unitType == UType.Villager)
             spRend.color = new Color(0.4f, 0.4f, 0.4f, 1.0f);
         else if (state == State.MOVED)
             spRend.color = new Color(0.8f, 0.8f, 0.8f, 1.0f);
@@ -94,6 +95,8 @@ public class UnitController : MonoBehaviour
             Debug.Log("NULL!!!!");
 
         textHP = transform.Find("Canvas/HP").gameObject;
+
+        mapCtrl = GameObject.FindWithTag("MapController").GetComponent<MapController>();
     }
 
     void Start() {}
@@ -210,8 +213,109 @@ public class UnitController : MonoBehaviour
 
     public void initMoveTiles()
     {
-        drawMoveTiles();
+        //drawMoveTiles();
+        Vector2Int thisPos = new Vector2Int(this.x, this.y);
+
+        drawMoveTile(this.x, this.y);
+        FloodFill(thisPos, this.move + 1); // must include initial tile
+        //StartCoroutine(BFS(this.x, this.y, this.move + 1)); // must include initial tile
     }
+
+
+
+
+    private void FloodFill(Vector2Int pos, int moveRemaining) {
+        int costOfTile = mapCtrl.GetTerrainCost(pos.x, pos.y);
+
+        if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(pos.x, pos.y)) 
+            return;
+
+        if (gC.GetUnitAt(pos.x, pos.y) == null)
+            drawMoveTile(pos.x, pos.y);
+        mapCtrl.Visit(pos.x, pos.y);
+        moveRemaining -= costOfTile;
+
+
+        Vector2Int posL = new Vector2Int(pos.x - 1, pos.y);
+        Vector2Int posR = new Vector2Int(pos.x + 1, pos.y);
+        Vector2Int posU = new Vector2Int(pos.x, pos.y + 1);
+        Vector2Int posD = new Vector2Int(pos.x, pos.y - 1);
+
+        // draw left
+        if (gC.isValidPos(posL) && 
+            (gC.GetUnitAt(posL) == null || isSameSide(gC.GetUnitAt(posL).GetComponent<UnitController>())))
+            FloodFill(posL, moveRemaining);
+        // draw right
+        if (gC.isValidPos(posR) && 
+            (gC.GetUnitAt(posR) == null || isSameSide(gC.GetUnitAt(posR).GetComponent<UnitController>())))
+            FloodFill(posR, moveRemaining);
+        // draw up
+        if (gC.isValidPos(posU) && 
+            (gC.GetUnitAt(posU) == null || isSameSide(gC.GetUnitAt(posU).GetComponent<UnitController>())))
+            FloodFill(posU, moveRemaining);
+        // draw down
+        if (gC.isValidPos(posD) && 
+            (gC.GetUnitAt(posD) == null || isSameSide(gC.GetUnitAt(posD).GetComponent<UnitController>())))
+            FloodFill(posD, moveRemaining);
+
+        mapCtrl.ResetVisit();
+    }
+
+    // private IEnumerator BFS(int x, int y, int moveRemaining) {
+    //     WaitForSeconds wait = new WaitForSeconds(0.4f);
+
+    //     int costOfTile = mapCtrl.GetTerrainCost(x,y);
+
+    //     if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(x,y)) {
+    //         //mapCtrl.ResetVisit();
+    //         yield break;
+    //     }
+
+    //     yield return wait;
+
+    //     drawMoveTile(x, y);
+    //     mapCtrl.Visit(x, y);
+    //     moveRemaining -= costOfTile;
+
+    //     // draw left
+    //     if (gC.isValidPos(x - 1, y) && gC.GetUnitAt(x - 1, y) == null)
+    //         StartCoroutine(BFS(x - 1, y, moveRemaining));
+    //     // draw up
+    //     if (gC.isValidPos(x + 1, y) && gC.GetUnitAt(x + 1, y) == null)
+    //         StartCoroutine(BFS(x + 1, y, moveRemaining));
+    //     // draw right
+    //     if (gC.isValidPos(x, y + 1) && gC.GetUnitAt(x, y + 1) == null)
+    //         StartCoroutine(BFS(x, y + 1, moveRemaining));
+    //     // draw down
+    //     if (gC.isValidPos(x, y - 1) && gC.GetUnitAt(x, y - 1) == null)
+    //         StartCoroutine(BFS(x, y - 1, moveRemaining));
+    // }
+
+// frontier = PriorityQueue()
+// frontier.put(start, 0)
+// came_from = dict()
+// cost_so_far = dict()
+// came_from[start] = None
+// cost_so_far[start] = 0
+
+// while not frontier.empty():
+//    current = frontier.get()
+
+//    if current == goal:
+//       break
+   
+//    for next in graph.neighbors(current):
+//       new_cost = cost_so_far[current] + graph.cost(current, next)
+//       if next not in cost_so_far or new_cost < cost_so_far[next]:
+//          cost_so_far[next] = new_cost
+//          priority = new_cost
+//          frontier.put(next, priority)
+//          came_from[next] = current
+
+    private void BFS2() {
+        //var frontier = new PriorityQueue<Vector3Int, int>();
+    }
+
 
     private void drawMoveTiles()
     {

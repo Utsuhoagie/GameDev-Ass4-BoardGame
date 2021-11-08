@@ -4,12 +4,12 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class MapTile : Tile {
-
-    public string customName = "This is my custom tile!";
-    
+        
     public enum Terrain { Plains, Forest, Fort, BlueFort, RedFort, Base, BFlag, RFlag, Unmovable }
     Terrain terrain;
     
+    public bool isVisited = false;
+
     float def;
     int gold;
     int mvCost;
@@ -23,6 +23,7 @@ public class MapTile : Tile {
     // ---- Getters & Setters -----------------------
 
     public float GetDef() { return def; }
+    public int GetCost() { return mvCost; }
 
     // ---- Main ----------------------
     public void Instantiate(Terrain _terrain) {

@@ -27,6 +27,7 @@ public class GameController : MonoBehaviour
 
     // --- Getters & Setters ------------------
     public GameObject GetUnitAt(int x, int y) { return boardPos[x, y]; }
+    public GameObject GetUnitAt(Vector2Int pos) { return boardPos[pos.x, pos.y]; }
 
     public void SetUnitAt(int x, int y, GameObject unit) { boardPos[x, y] = unit; }
 
@@ -158,5 +159,12 @@ public class GameController : MonoBehaviour
         if (x < 0 || y < 0 || x >= 8 || y >= 8)
             return false;
         else return true;
+    }
+
+    public bool isValidPos(Vector2Int pos)
+    {
+        if (pos.x < 0 || pos.y < 0 || pos.x >= 8 || pos.y >= 8)
+            return false;
+        else return true;        
     }
 }

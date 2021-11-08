@@ -6,7 +6,8 @@ using Terrain = MapTile.Terrain;
 public class MapController : MonoBehaviour {
 	Tilemap terrainTilemap;
 
-    public MapTile[,] mapTiles = new MapTile[8,8];
+    MapTile[,] mapTiles = new MapTile[8,8];
+    bool[,] isVisited = new bool[8,8];
 
 	//public Dictionary<Vector3, MapTile> map;
 
@@ -26,13 +27,13 @@ public class MapController : MonoBehaviour {
         compareSprites.Add(base_);
         compareSprites.Add(BFlag);
         compareSprites.Add(RFlag);
-		// if (instance == null) 
-		// 	instance = this;
-		// else if (instance != this)
-		// 	Destroy(gameObject);
 
 		GetMapTiles();
+
+        ResetVisit();
 	}
+
+    // ---- Functions -----------------------------
 
 	// Use this for initialization
 	void GetMapTiles() {
@@ -59,6 +60,29 @@ public class MapController : MonoBehaviour {
 
         return Terrain.Unmovable;
     }
+
+    public float GetTerrainDef(int x, int y) {
+        //Vector3Int cellPos = new Vector3Int(x - 4, y - 4, 0);
+        MapTile currentTile = mapTiles[x,y];
+        return currentTile.GetDef();
+    }
+
+    public int GetTerrainCost(int x, int y) {
+        MapTile currentTile = mapTiles[x,y];
+        return currentTile.GetCost();
+    }
+
+    public bool IsVisited(int x, int y) { return isVisited[x,y]; }
+    public void Visit(int x, int y) { 
+        isVisited[x,y] = true;
+    }
+    public void ResetVisit() {
+        for (int x = 0; x < 8; x++)
+            for (int y = 0; y < 8; y++)
+                isVisited[x,y] = false;        
+    }
+
+
 
 
     void Update() {
@@ -87,10 +111,5 @@ public class MapController : MonoBehaviour {
         // }
     }
 
-    // ---- Functions -----------------------------
-    public float GetTerrainDef(int x, int y) {
-        //Vector3Int cellPos = new Vector3Int(x - 4, y - 4, 0);
-        MapTile currentTile = mapTiles[x,y];
-        return currentTile.GetDef();
-    }
+
 }

@@ -35,7 +35,7 @@ public class CombatController : MonoBehaviour
         float aDef = mapCtrl.GetTerrainDef(attacker.GetX(), attacker.GetY());
         float dDef = mapCtrl.GetTerrainDef(defender.GetX(), defender.GetY());
 
-        int atkDmg = (int) (baseDmg * HP_modifier * dDef);
+        int atkDmg = Mathf.RoundToInt(baseDmg * HP_modifier * dDef);
         
         predictions[1] = dHP - atkDmg;
 
@@ -52,7 +52,7 @@ public class CombatController : MonoBehaviour
                 baseDmg = damage[(int)defender.GetUType(), (int)attacker.GetUType()];
                 HP_modifier = (float)dHP / 100;
 
-                int defDmg = (int) (baseDmg * HP_modifier * aDef);
+                int defDmg = Mathf.RoundToInt(baseDmg * HP_modifier * aDef);
                 predictions[0] = aHP - defDmg;
             }
             else
@@ -72,7 +72,7 @@ public class CombatController : MonoBehaviour
         float aDef = mapCtrl.GetTerrainDef(attacker.GetX(), attacker.GetY());
         float dDef = mapCtrl.GetTerrainDef(defender.GetX(), defender.GetY());
 
-        int atkDmg = (int) (baseDmg * HP_modifier * dDef);
+        int atkDmg = Mathf.RoundToInt(baseDmg * HP_modifier * dDef);
         defender.SetHP(dHP - atkDmg);
 
         if (defender.GetHP() <= 0)
@@ -84,7 +84,7 @@ public class CombatController : MonoBehaviour
                 baseDmg = damage[(int)defender.GetUType(), (int)attacker.GetUType()];
                 HP_modifier = (float)dHP / 100;
 
-                int defDmg = (int) (baseDmg * HP_modifier * aDef);
+                int defDmg = Mathf.RoundToInt(baseDmg * HP_modifier * aDef);
                 attacker.SetHP(aHP - defDmg);
             }
         }
