@@ -14,6 +14,7 @@ public class UnitController : MonoBehaviour
     Collider2D col;
     SpriteRenderer spRend;
     GameObject textHP;
+    GameObject healImg;
     MapController mapCtrl;
 
     // References to unit sprites
@@ -86,9 +87,18 @@ public class UnitController : MonoBehaviour
             //isMoved = false;
 
             bool onFort = (mapCtrl.GetTerrain(this.GetPos()) == Terrain.Fort);
-            if (onFort)
+            if (onFort) {
                 SetHP(Mathf.Clamp(this.HP + 20, 0, 100));
+                StartCoroutine(Heal());
+
+            }
         }
+    }
+    IEnumerator Heal() {
+        healImg.SetActive(true);
+        yield return new WaitForSeconds(0.8f);
+        healImg.SetActive(false);
+        yield break;
     }
 
     public bool isRed() { return side == Side.RED; }
@@ -107,6 +117,7 @@ public class UnitController : MonoBehaviour
         spRend = GetComponent<SpriteRenderer>();
 
         textHP = transform.Find("Canvas/HP").gameObject;
+        healImg = transform.Find("Canvas/Heal").gameObject;
 
         mapCtrl = GameObject.FindWithTag("MapController").GetComponent<MapController>();
     }
