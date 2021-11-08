@@ -21,6 +21,47 @@ public class CombatController : MonoBehaviour
         mapCtrl = GameObject.FindWithTag("MapController").GetComponent<MapController>();
     }
 
+    // Return int[2] of attacker and defender's HP after simulating combat
+    // but don't actually change HP!!!!
+    public int[] PredictDamage(UnitController attacker, UnitController defender) {
+        int[] predictions = new int[2];
+        
+        // attack
+        int aHP = attacker.GetHP();
+        int dHP = defender.GetHP();
+
+        float baseDmg = damage[(int)attacker.GetUType(), (int)defender.GetUType()];
+        float HP_modifier = (float)aHP / 100;
+        float aDef = mapCtrl.GetTerrainDef(attacker.GetX(), attacker.GetY());
+        float dDef = mapCtrl.GetTerrainDef(defender.GetX(), defender.GetY());
+
+        int atkDmg = (int) (baseDmg * HP_modifier * dDef);
+        
+        predictions[1] = dHP - atkDmg;
+
+        if (predictions[1] <= 0) {
+            predictions[0] = aHP;
+
+            return predictions;
+        }
+
+        else {  // counterattack
+            if (defender.GetAtkRange() == attacker.GetAtkRange()) {
+                dHP = predictions[1];
+
+                baseDmg = damage[(int)defender.GetUType(), (int)attacker.GetUType()];
+                HP_modifier = (float)dHP / 100;
+
+                int defDmg = (int) (baseDmg * HP_modifier * aDef);
+                predictions[0] = aHP - defDmg;
+            }
+            else
+                predictions[0] = aHP;
+
+            return predictions;
+        }
+    }
+
     public void Attack(UnitController attacker, UnitController defender) {
         // attack
         int aHP = attacker.GetHP();
@@ -32,13 +73,11 @@ public class CombatController : MonoBehaviour
         float dDef = mapCtrl.GetTerrainDef(defender.GetX(), defender.GetY());
 
         int atkDmg = (int) (baseDmg * HP_modifier * dDef);
-        Debug.Log($"{attacker.name} hit {defender.name} for base {baseDmg} damage!");
         defender.SetHP(dHP - atkDmg);
 
         if (defender.GetHP() <= 0)
             defender.Die();
-        else {
-            // counterattack
+        else {  // counterattack
             if (defender.GetAtkRange() == attacker.GetAtkRange()) {
                 dHP = defender.GetHP();
 
