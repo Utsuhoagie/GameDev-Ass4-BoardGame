@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Side = GameController.Side;
+using Terrain = MapTile.Terrain;
 
 public class UnitController : MonoBehaviour
 {
@@ -44,7 +45,7 @@ public class UnitController : MonoBehaviour
     public int GetY() { return y; }
     public void SetX(int _x) { x = _x; }
     public void SetY(int _y) { y = _y; }
-
+    public Vector2Int GetPos() { return new Vector2Int(x, y); }
     public void UpdatePos()
     {
         var pos = new Vector3(x, y, -1);
@@ -65,7 +66,10 @@ public class UnitController : MonoBehaviour
     public void SetState(State _state) { 
         state = _state;
 
-        if (state == State.END || this.unitType == UType.Villager)
+        if (state == State.END)
+            mapCtrl.ResetVisit();
+
+        if (state == State.END)
             spRend.color = new Color(0.4f, 0.4f, 0.4f, 1.0f);
         else if (state == State.MOVED)
             spRend.color = new Color(0.8f, 0.8f, 0.8f, 1.0f);
@@ -74,6 +78,14 @@ public class UnitController : MonoBehaviour
 
         if (state == State.MOVED)
             drawAtkTiles();
+        
+        if (state == State.READY) {
+            //if (this.unitType == UType.Villager)
+
+            bool onFort = (mapCtrl.GetTerrain(this.GetPos()) == Terrain.Fort);
+            if (onFort)
+                SetHP(Mathf.Clamp(this.HP + 20, 0, 100));
+        }
     }
 
     public bool isRed() { return side == Side.RED; }
@@ -90,9 +102,6 @@ public class UnitController : MonoBehaviour
 
         col = GetComponent<Collider2D>();
         spRend = GetComponent<SpriteRenderer>();
-
-        if (transform.Find("Canvas/HP") == null)
-            Debug.Log("NULL!!!!");
 
         textHP = transform.Find("Canvas/HP").gameObject;
 
@@ -205,7 +214,7 @@ public class UnitController : MonoBehaviour
     }
 
     public void Die() {
-        //Debug.Log($"{this.name} died!");
+        gC.RemoveUnitFromGame(this.gameObject);
         Destroy(this.gameObject);
     }
 
@@ -213,27 +222,30 @@ public class UnitController : MonoBehaviour
 
     public void initMoveTiles()
     {
-        //drawMoveTiles();
         Vector2Int thisPos = new Vector2Int(this.x, this.y);
 
-        drawMoveTile(this.x, this.y);
-        FloodFill(thisPos, this.move + 1); // must include initial tile
-        //StartCoroutine(BFS(this.x, this.y, this.move + 1)); // must include initial tile
+        mapCtrl.ResetVisit();
+        FloodFill(thisPos, this.move);
     }
 
 
-
-
     private void FloodFill(Vector2Int pos, int moveRemaining) {
-        int costOfTile = mapCtrl.GetTerrainCost(pos.x, pos.y);
+        int costOfTile = mapCtrl.GetTerrainCost(pos);
 
-        if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(pos.x, pos.y)) 
+        if (moveRemaining == 0 || moveRemaining < costOfTile || (mapCtrl.IsVisited(pos) && pos != this.GetPos())) 
             return;
 
-        if (gC.GetUnitAt(pos.x, pos.y) == null)
+        
+
+        if (gC.isValidPos(pos) && 
+            (gC.GetUnitAt(pos) == null || gC.GetUnitAt(pos) == this.gameObject))
+            
             drawMoveTile(pos.x, pos.y);
+
         mapCtrl.Visit(pos.x, pos.y);
-        moveRemaining -= costOfTile;
+
+        if (pos != new Vector2Int(this.x, this.y))
+            moveRemaining -= costOfTile;
 
 
         Vector2Int posL = new Vector2Int(pos.x - 1, pos.y);
@@ -241,81 +253,19 @@ public class UnitController : MonoBehaviour
         Vector2Int posU = new Vector2Int(pos.x, pos.y + 1);
         Vector2Int posD = new Vector2Int(pos.x, pos.y - 1);
 
-        // draw left
-        if (gC.isValidPos(posL) && 
-            (gC.GetUnitAt(posL) == null || isSameSide(gC.GetUnitAt(posL).GetComponent<UnitController>())))
-            FloodFill(posL, moveRemaining);
-        // draw right
-        if (gC.isValidPos(posR) && 
-            (gC.GetUnitAt(posR) == null || isSameSide(gC.GetUnitAt(posR).GetComponent<UnitController>())))
-            FloodFill(posR, moveRemaining);
-        // draw up
-        if (gC.isValidPos(posU) && 
-            (gC.GetUnitAt(posU) == null || isSameSide(gC.GetUnitAt(posU).GetComponent<UnitController>())))
-            FloodFill(posU, moveRemaining);
-        // draw down
-        if (gC.isValidPos(posD) && 
-            (gC.GetUnitAt(posD) == null || isSameSide(gC.GetUnitAt(posD).GetComponent<UnitController>())))
-            FloodFill(posD, moveRemaining);
+        Queue<Vector2Int> q = new Queue<Vector2Int>();
+        q.Enqueue(posL); q.Enqueue(posR); q.Enqueue(posU); q.Enqueue(posD); 
 
-        mapCtrl.ResetVisit();
+        while (q.Count > 0) {
+            Vector2Int posToVisit = q.Dequeue();
+
+            if (gC.isValidPos(posToVisit) && !mapCtrl.IsVisited(posToVisit) && 
+               (gC.GetUnitAt(pos) == null || isSameSide(gC.GetUnitAt(pos).GetComponent<UnitController>())))
+                {
+                    FloodFill(posToVisit, moveRemaining);
+                }
+        }
     }
-
-    // private IEnumerator BFS(int x, int y, int moveRemaining) {
-    //     WaitForSeconds wait = new WaitForSeconds(0.4f);
-
-    //     int costOfTile = mapCtrl.GetTerrainCost(x,y);
-
-    //     if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(x,y)) {
-    //         //mapCtrl.ResetVisit();
-    //         yield break;
-    //     }
-
-    //     yield return wait;
-
-    //     drawMoveTile(x, y);
-    //     mapCtrl.Visit(x, y);
-    //     moveRemaining -= costOfTile;
-
-    //     // draw left
-    //     if (gC.isValidPos(x - 1, y) && gC.GetUnitAt(x - 1, y) == null)
-    //         StartCoroutine(BFS(x - 1, y, moveRemaining));
-    //     // draw up
-    //     if (gC.isValidPos(x + 1, y) && gC.GetUnitAt(x + 1, y) == null)
-    //         StartCoroutine(BFS(x + 1, y, moveRemaining));
-    //     // draw right
-    //     if (gC.isValidPos(x, y + 1) && gC.GetUnitAt(x, y + 1) == null)
-    //         StartCoroutine(BFS(x, y + 1, moveRemaining));
-    //     // draw down
-    //     if (gC.isValidPos(x, y - 1) && gC.GetUnitAt(x, y - 1) == null)
-    //         StartCoroutine(BFS(x, y - 1, moveRemaining));
-    // }
-
-// frontier = PriorityQueue()
-// frontier.put(start, 0)
-// came_from = dict()
-// cost_so_far = dict()
-// came_from[start] = None
-// cost_so_far[start] = 0
-
-// while not frontier.empty():
-//    current = frontier.get()
-
-//    if current == goal:
-//       break
-   
-//    for next in graph.neighbors(current):
-//       new_cost = cost_so_far[current] + graph.cost(current, next)
-//       if next not in cost_so_far or new_cost < cost_so_far[next]:
-//          cost_so_far[next] = new_cost
-//          priority = new_cost
-//          frontier.put(next, priority)
-//          came_from[next] = current
-
-    private void BFS2() {
-        //var frontier = new PriorityQueue<Vector3Int, int>();
-    }
-
 
     private void drawMoveTiles()
     {

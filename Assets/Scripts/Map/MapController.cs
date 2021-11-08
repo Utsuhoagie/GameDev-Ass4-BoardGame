@@ -9,9 +9,6 @@ public class MapController : MonoBehaviour {
     MapTile[,] mapTiles = new MapTile[8,8];
     bool[,] isVisited = new bool[8,8];
 
-	//public Dictionary<Vector3, MapTile> map;
-
-
     // Sprites for comparison
     public Sprite plains, forest, fort, blueFort, redFort, base_, BFlag, RFlag;
     List<Sprite> compareSprites = new List<Sprite>();
@@ -35,7 +32,6 @@ public class MapController : MonoBehaviour {
 
     // ---- Functions -----------------------------
 
-	// Use this for initialization
 	void GetMapTiles() {
         terrainTilemap = GameObject.FindWithTag("MainTilemap").GetComponent<Tilemap>();
 
@@ -58,58 +54,23 @@ public class MapController : MonoBehaviour {
             if (sprite == compareSprites[i])
                 return (Terrain)i;
 
-        return Terrain.Unmovable;
+        return Terrain.Unmovable;       // Doesn't match anything else, is unmovable
     }
 
-    public float GetTerrainDef(int x, int y) {
-        //Vector3Int cellPos = new Vector3Int(x - 4, y - 4, 0);
-        MapTile currentTile = mapTiles[x,y];
-        return currentTile.GetDef();
-    }
+    public float GetTerrainDef(Vector2Int pos) { return mapTiles[pos.x, pos.y].GetDef(); }
 
-    public int GetTerrainCost(int x, int y) {
-        MapTile currentTile = mapTiles[x,y];
-        return currentTile.GetCost();
-    }
+    public int GetTerrainCost(Vector2Int pos) { return mapTiles[pos.x, pos.y].GetCost(); }
 
-    public bool IsVisited(int x, int y) { return isVisited[x,y]; }
-    public void Visit(int x, int y) { 
-        isVisited[x,y] = true;
-    }
+    public Terrain GetTerrain(Vector2Int pos) { return mapTiles[pos.x, pos.y].GetTerrain(); }
+
+    
+    // ---- For flood fill -----------------------
+
+    public bool IsVisited(Vector2Int pos) { return isVisited[pos.x, pos.y]; }
+    public void Visit(int x, int y) { isVisited[x,y] = true; }
     public void ResetVisit() {
         for (int x = 0; x < 8; x++)
             for (int y = 0; y < 8; y++)
                 isVisited[x,y] = false;        
     }
-
-
-
-
-    void Update() {
-        // if (Input.GetMouseButtonDown(0)) {
-        //     Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //     Vector3Int cellPosAtMouse = Vector3Int.FloorToInt(terrainTilemap.WorldToCell(mousePos));
-
-        //     var tileAt = terrainTilemap.GetTile(cellPosAtMouse);
-        //     var spriteAt = terrainTilemap.GetSprite(cellPosAtMouse);
-
-        //     Vector3Int offset = new Vector3Int(-4, -4, 0);
-        //     Vector3Int offsetPos = cellPosAtMouse - offset;
-
-        //     Debug.Log($"Mouse clicked on Tile {offsetPos} with sprite name = {spriteAt.name}!");
-
-            
-        //     var tileSprite = terrainTilemap.GetSprite(cellPosAtMouse);
-        //     //tileSprite;
-
-        //     // if (terrainTilemap.color == Color.white) {
-        //     //     terrainTilemap.color = Color.gray;
-        //     // }
-        //     // else if (terrainTilemap.color == Color.gray) {
-        //     //     terrainTilemap.color = Color.white;
-        //     // }
-        // }
-    }
-
-
 }

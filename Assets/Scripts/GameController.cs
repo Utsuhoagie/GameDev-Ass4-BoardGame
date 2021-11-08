@@ -49,10 +49,10 @@ public class GameController : MonoBehaviour
         blueText.enabled = true;
         redText.enabled = false;
 
-        CreateUnit("blue_villager", 2, 4);
-        CreateUnit("blue_warrior", 3, 4);
-        CreateUnit("blue_armor", 4, 4);
-        CreateUnit("blue_archer", 5, 4);
+        CreateUnit("blue_villager", 2, 5);
+        CreateUnit("blue_warrior", 3, 5);
+        CreateUnit("blue_armor", 4, 5);
+        CreateUnit("blue_archer", 5, 5);
         CreateUnit("red_villager", 5, 2);
         CreateUnit("red_warrior", 4, 2);
         CreateUnit("red_armor", 3, 2);
@@ -90,6 +90,15 @@ public class GameController : MonoBehaviour
             redUnits.Add(unit);
 
         boardPos[uC.GetX(), uC.GetY()] = unit;
+    }
+
+    public void RemoveUnitFromGame(GameObject unit) {
+        if (unit.GetComponent<UnitController>().GetSide() == Side.BLUE) {
+            blueUnits.Remove(unit);
+        }
+        else {
+            redUnits.Remove(unit);
+        }
     }
 
     // --- Turns & Game -----------------
