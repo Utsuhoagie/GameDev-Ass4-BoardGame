@@ -4,19 +4,28 @@ using UnityEngine.Tilemaps;
 using Terrain = MapTile.Terrain;
 
 public class MapController : MonoBehaviour {
-	public Tilemap terrainTilemap;
+	Tilemap terrainTilemap;
 
     public MapTile[,] mapTiles = new MapTile[8,8];
 
-	public Dictionary<Vector3, MapTile> map;
+	//public Dictionary<Vector3, MapTile> map;
 
 
     // Sprites for comparison
-    public Sprite plains, forest, mountain, fort, blueFort, redFort, base_, baseFlag;
+    public Sprite plains, forest, fort, blueFort, redFort, base_, BFlag, RFlag;
+    List<Sprite> compareSprites = new List<Sprite>();
 
-
+    // ---------------------------------------
 
 	void Awake() {
+        compareSprites.Add(plains);
+        compareSprites.Add(forest);
+        compareSprites.Add(fort);
+        compareSprites.Add(blueFort);
+        compareSprites.Add(redFort);
+        compareSprites.Add(base_);
+        compareSprites.Add(BFlag);
+        compareSprites.Add(RFlag);
 		// if (instance == null) 
 		// 	instance = this;
 		// else if (instance != this)
@@ -31,56 +40,57 @@ public class MapController : MonoBehaviour {
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
+                Vector3 pos = new Vector3((float)x - 4.0f, (float)y - 4.0f, 0.0f);
+                Vector3Int cellPos = Vector3Int.FloorToInt(pos);
+                Sprite spriteAt = terrainTilemap.GetSprite(cellPos);
+                
+                Terrain tileTerrain = GetTerrainFromSprite(spriteAt);
 
-
-                // mapTiles[x,y].Instantiate(
-                //     _terrain: Terrain.Plains
-                // );
+                mapTiles[x,y] = (MapTile)ScriptableObject.CreateInstance("MapTile");
+                mapTiles[x,y].Instantiate(tileTerrain);
             }
         }
-
-        // tiles = new Dictionary<Vector3, MapTile>();
-
-		// foreach (Vector3Int pos in terrainTilemap.cellBounds.allPositionsWithin) {
-		// 	var localPos = new Vector3Int(pos.x, pos.y, pos.z);
-
-		// 	if (!terrainTilemap.HasTile(localPos)) continue;
-			
-        //     var tile = new MapTile {
-		// 		LocalPos = localPos,
-		// 		WorldPos = terrainTilemap.CellToWorld(localPos),
-		// 		TileBase = terrainTilemap.GetTile(localPos),
-		// 		TilemapMember = terrainTilemap,
-		// 		Name = localPos.x + "," + localPos.y,
-		// 		Cost = 1 // TODO: Change this with the proper cost from ruletile
-		// 	};
-			
-		// 	tiles.Add(tile.WorldPos, tile);
-		// }
 	}
 
+    Terrain GetTerrainFromSprite(Sprite sprite) {
+        for (int i = 0; i < compareSprites.Count; i++)
+            if (sprite == compareSprites[i])
+                return (Terrain)i;
+
+        return Terrain.Unmovable;
+    }
+
+
     void Update() {
-        if (Input.GetMouseButtonDown(0)) {
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector3Int cellPosAtMouse = Vector3Int.FloorToInt(terrainTilemap.WorldToCell(mousePos));
+        // if (Input.GetMouseButtonDown(0)) {
+        //     Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //     Vector3Int cellPosAtMouse = Vector3Int.FloorToInt(terrainTilemap.WorldToCell(mousePos));
 
-            var tileAt = terrainTilemap.GetTile(cellPosAtMouse);
+        //     var tileAt = terrainTilemap.GetTile(cellPosAtMouse);
+        //     var spriteAt = terrainTilemap.GetSprite(cellPosAtMouse);
 
-            Vector3Int offset = new Vector3Int(-4, -4, 0);
-            Vector3Int offsetPos = cellPosAtMouse - offset;
+        //     Vector3Int offset = new Vector3Int(-4, -4, 0);
+        //     Vector3Int offsetPos = cellPosAtMouse - offset;
 
-            Debug.Log($"Mouse clicked on Tile {offsetPos}!");
+        //     Debug.Log($"Mouse clicked on Tile {offsetPos} with sprite name = {spriteAt.name}!");
 
             
-            var tileSprite = terrainTilemap.GetSprite(cellPosAtMouse);
-            //tileSprite;
+        //     var tileSprite = terrainTilemap.GetSprite(cellPosAtMouse);
+        //     //tileSprite;
 
-            // if (terrainTilemap.color == Color.white) {
-            //     terrainTilemap.color = Color.gray;
-            // }
-            // else if (terrainTilemap.color == Color.gray) {
-            //     terrainTilemap.color = Color.white;
-            // }
-        }
+        //     // if (terrainTilemap.color == Color.white) {
+        //     //     terrainTilemap.color = Color.gray;
+        //     // }
+        //     // else if (terrainTilemap.color == Color.gray) {
+        //     //     terrainTilemap.color = Color.white;
+        //     // }
+        // }
+    }
+
+    // ---- Functions -----------------------------
+    public float GetTerrainDef(int x, int y) {
+        //Vector3Int cellPos = new Vector3Int(x - 4, y - 4, 0);
+        MapTile currentTile = mapTiles[x,y];
+        return currentTile.GetDef();
     }
 }

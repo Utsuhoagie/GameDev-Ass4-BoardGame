@@ -10,6 +10,7 @@ TagManager:
   - AtkTile
   - CombatController
   - MainTilemap
+  - MapController
   layers:
   - Default
   - TransparentFX

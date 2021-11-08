@@ -7,10 +7,10 @@ public class MapTile : Tile {
 
     public string customName = "This is my custom tile!";
     
-    public enum Terrain { Plains, Forest, Mountain, Fort, BlueFort, RedFort, Base, BaseFlag }
+    public enum Terrain { Plains, Forest, Fort, BlueFort, RedFort, Base, BFlag, RFlag, Unmovable }
     Terrain terrain;
     
-    int def;
+    float def;
     int gold;
     int mvCost;
     Sprite _sprite;
@@ -22,7 +22,7 @@ public class MapTile : Tile {
 
     // ---- Getters & Setters -----------------------
 
-
+    public float GetDef() { return def; }
 
     // ---- Main ----------------------
     public void Instantiate(Terrain _terrain) {
@@ -30,14 +30,14 @@ public class MapTile : Tile {
 
         switch(terrain) {
             case Terrain.Plains:
-                def = 0;
                 mvCost = 1;
+                def = 1;
                 break;
             case Terrain.Forest:
                 mvCost = 2;
-                def = 1;
+                def = 0.9f;
                 break;
-            case Terrain.Mountain:
+            case Terrain.Unmovable:
                 mvCost = 100;
                 def = 0;
                 break;
@@ -45,15 +45,16 @@ public class MapTile : Tile {
             case Terrain.BlueFort:
             case Terrain.RedFort:
                 mvCost = 1;
-                def = 2;
+                def = 0.8f;
                 break;
             case Terrain.Base:
                 mvCost = 1;
-                def = 3;
+                def = 0.7f;
                 break;
-            case Terrain.BaseFlag:
+            case Terrain.BFlag:
+            case Terrain.RFlag:
                 mvCost = 1;
-                def = 0;
+                def = 1;
                 break;
         }
 

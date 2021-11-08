@@ -13,10 +13,10 @@ TextureImporter:
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_2
   - first:
       213: -6971266520587217513
-    second: TileSet
+    second: Tileset_Plains
   - first:
       213: 4138603417118373318
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_4
+    second: Tileset_Forests
   - first:
       213: 4715811154161467774
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_5
@@ -34,13 +34,13 @@ TextureImporter:
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_9
   - first:
       213: 8760455931082862991
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_10
+    second: Tileset_MtnSmall
   - first:
       213: 6517656634279543167
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_11
   - first:
       213: -4901421412635563908
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_12
+    second: Tileset_MtnBig
   - first:
       213: -7483245377842375868
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_13
@@ -91,22 +91,22 @@ TextureImporter:
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_28
   - first:
       213: -1770919411176355805
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_29
+    second: Tileset_NFort
   - first:
       213: -5545809605091127160
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_30
+    second: Tileset_RFort
   - first:
       213: -4555282337753641528
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_31
   - first:
       213: -8754537667631589643
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_32
+    second: Tileset_BFort
   - first:
       213: -2105578757761887695
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_33
   - first:
       213: -2654929237797318956
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_34
+    second: Tileset_Base
   - first:
       213: -5139491042304069161
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_35
@@ -136,13 +136,13 @@ TextureImporter:
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_43
   - first:
       213: 5819469295439136815
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_44
+    second: Tileset_RFlag
   - first:
       213: -8180875587015788165
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_45
   - first:
       213: -2512267021823373989
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_46
+    second: Tileset_BFlag
   - first:
       213: 7137362686624233089
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_47
@@ -277,13 +277,13 @@ TextureImporter:
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_90
   - first:
       213: 256812325457282868
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_91
+    second: Tileset_River1
   - first:
       213: -7820266060580529844
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_92
   - first:
       213: -624259690709733623
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_93
+    second: Tileset_River2
   - first:
       213: -6727411657445258979
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_94
@@ -298,7 +298,7 @@ TextureImporter:
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_97
   - first:
       213: 4043407434588590749
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_98
+    second: Tileset_River5
   - first:
       213: -613273526799016881
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_99
@@ -319,13 +319,13 @@ TextureImporter:
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_104
   - first:
       213: -9116345507510357502
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_105
+    second: Tileset_River3
   - first:
       213: -530177838832324099
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_106
   - first:
       213: 7318261318350077600
-    second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_107
+    second: Tileset_River4
   - first:
       213: -4905576238058666720
     second: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_108
@@ -1203,7 +1203,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: TileSet
+      name: Tileset_Plains
       rect:
         serializedVersion: 2
         x: 48
@@ -1224,7 +1224,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_4
+      name: Tileset_Forests
       rect:
         serializedVersion: 2
         x: 64
@@ -1350,7 +1350,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_10
+      name: Tileset_MtnSmall
       rect:
         serializedVersion: 2
         x: 48
@@ -1392,7 +1392,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_12
+      name: Tileset_MtnBig
       rect:
         serializedVersion: 2
         x: 80
@@ -1707,7 +1707,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_29
+      name: Tileset_NFort
       rect:
         serializedVersion: 2
         x: 16
@@ -1728,7 +1728,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_30
+      name: Tileset_RFort
       rect:
         serializedVersion: 2
         x: 32
@@ -1770,7 +1770,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_32
+      name: Tileset_BFort
       rect:
         serializedVersion: 2
         x: 64
@@ -1812,7 +1812,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_34
+      name: Tileset_Base
       rect:
         serializedVersion: 2
         x: 96
@@ -1854,7 +1854,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_44
+      name: Tileset_RFlag
       rect:
         serializedVersion: 2
         x: 32
@@ -1875,7 +1875,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_46
+      name: Tileset_BFlag
       rect:
         serializedVersion: 2
         x: 64
@@ -2694,7 +2694,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_91
+      name: Tileset_River1
       rect:
         serializedVersion: 2
         x: 0
@@ -2736,7 +2736,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_93
+      name: Tileset_River2
       rect:
         serializedVersion: 2
         x: 32
@@ -2799,7 +2799,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_98
+      name: Tileset_River5
       rect:
         serializedVersion: 2
         x: 0
@@ -2904,7 +2904,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_105
+      name: Tileset_River3
       rect:
         serializedVersion: 2
         x: 0
@@ -2946,7 +2946,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Tile-set - Toen's Medieval Strategy (16x16) - v.1.0_107
+      name: Tileset_River4
       rect:
         serializedVersion: 2
         x: 32
