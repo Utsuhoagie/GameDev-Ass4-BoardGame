@@ -29,7 +29,20 @@ public class GameController : MonoBehaviour
     public GameObject GetUnitAt(int x, int y) { return boardPos[x, y]; }
     public GameObject GetUnitAt(Vector2Int pos) { return boardPos[pos.x, pos.y]; }
 
-    public void SetUnitAt(int x, int y, GameObject unit) { boardPos[x, y] = unit; }
+    public void SetUnitAt(int x, int y, GameObject unit) { 
+        boardPos[x, y] = unit;
+
+        WinCheck(unit.GetComponent<UnitController>().GetSide());
+    }
+
+    void WinCheck(Side player) {
+        if (player == Side.BLUE)
+            if (boardPos[7,0] != null && boardPos[7,0].GetComponent<UnitController>().GetSide() == Side.BLUE)
+                endGame(Side.BLUE);
+        else
+            if (boardPos[0,7] != null && boardPos[0,7].GetComponent<UnitController>().GetSide() == Side.RED)
+                endGame(Side.RED);
+    }
 
     public void setPositionEmpty(int x, int y) { boardPos[x, y] = null; }
 
@@ -53,6 +66,7 @@ public class GameController : MonoBehaviour
         CreateUnit("blue_warrior", 3, 5);
         CreateUnit("blue_armor", 4, 5);
         CreateUnit("blue_archer", 5, 5);
+        CreateUnit("blue_villager", 7, 1);
         CreateUnit("red_villager", 5, 2);
         CreateUnit("red_warrior", 4, 2);
         CreateUnit("red_armor", 3, 2);
@@ -150,15 +164,18 @@ public class GameController : MonoBehaviour
         }
     }
 
+
     public bool isGameEnd() { return this.isGameOver; }
 
     public void endGame(Side winner)
     {
         this.isGameOver = true;
 
-        // TODO:
-        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().enabled = true;
-        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().text = $"{winner} wins!";
+        if (winner == Side.BLUE)
+            blueText.text = $"BLUE Wins!";
+        else
+            redText.text = $"RED Wins!";
+
     }
 
 

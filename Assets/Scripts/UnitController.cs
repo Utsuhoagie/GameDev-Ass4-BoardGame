@@ -267,41 +267,41 @@ public class UnitController : MonoBehaviour
         }
     }
 
-    private void drawMoveTiles()
-    {
-        // TODO: CHANGE WITH FLOOD FILL!!!!
+    // private void drawMoveTiles()
+    // {
+    //     // TODO: CHANGE WITH FLOOD FILL!!!!
 
-        drawMoveTile(x, y);
+    //     drawMoveTile(x, y);
 
-        for (int i = 1; i <= move; i++)
-        {
-            // draw left
-            if (gC.isValidPos(x - i, y) && gC.GetUnitAt(x - i, y) == null)
-                drawMoveTile(x - i, y);
-            // draw up
-            if (gC.isValidPos(x + i, y) && gC.GetUnitAt(x + i, y) == null)
-                drawMoveTile(x + i, y);
-            // draw right
-            if (gC.isValidPos(x, y + i) && gC.GetUnitAt(x, y + i) == null)
-                drawMoveTile(x, y + i);
-            // draw down
-            if (gC.isValidPos(x, y - i) && gC.GetUnitAt(x, y - i) == null)
-                drawMoveTile(x, y - i);
+    //     for (int i = 1; i <= move; i++)
+    //     {
+    //         // draw left
+    //         if (gC.isValidPos(x - i, y) && gC.GetUnitAt(x - i, y) == null)
+    //             drawMoveTile(x - i, y);
+    //         // draw up
+    //         if (gC.isValidPos(x + i, y) && gC.GetUnitAt(x + i, y) == null)
+    //             drawMoveTile(x + i, y);
+    //         // draw right
+    //         if (gC.isValidPos(x, y + i) && gC.GetUnitAt(x, y + i) == null)
+    //             drawMoveTile(x, y + i);
+    //         // draw down
+    //         if (gC.isValidPos(x, y - i) && gC.GetUnitAt(x, y - i) == null)
+    //             drawMoveTile(x, y - i);
 
-            // draw diagonal left top
-            if (i >= 2 && gC.isValidPos(x - (i - 1), y + (i - 1)) && gC.GetUnitAt(x - (i - 1), y + (i - 1)) == null)
-                drawMoveTile(x - (i - 1), y + (i - 1));
-            // draw diagonal right top
-            if (i >= 2 && gC.isValidPos(x + (i - 1), y + (i - 1)) && gC.GetUnitAt(x + (i - 1), y + (i - 1)) == null)
-                drawMoveTile(x + (i - 1), y + (i - 1));
-            // draw diagonal left bot
-            if (i >= 2 && gC.isValidPos(x - (i - 1), y - (i - 1)) && gC.GetUnitAt(x - (i - 1), y - (i - 1)) == null)
-                drawMoveTile(x - (i - 1), y - (i - 1));
-            // draw diagonal right bot
-            if (i >= 2 && gC.isValidPos(x + (i - 1), y - (i - 1)) && gC.GetUnitAt(x + (i - 1), y - (i - 1)) == null)
-                drawMoveTile(x + (i - 1), y - (i - 1));
-        }
-    }
+    //         // draw diagonal left top
+    //         if (i >= 2 && gC.isValidPos(x - (i - 1), y + (i - 1)) && gC.GetUnitAt(x - (i - 1), y + (i - 1)) == null)
+    //             drawMoveTile(x - (i - 1), y + (i - 1));
+    //         // draw diagonal right top
+    //         if (i >= 2 && gC.isValidPos(x + (i - 1), y + (i - 1)) && gC.GetUnitAt(x + (i - 1), y + (i - 1)) == null)
+    //             drawMoveTile(x + (i - 1), y + (i - 1));
+    //         // draw diagonal left bot
+    //         if (i >= 2 && gC.isValidPos(x - (i - 1), y - (i - 1)) && gC.GetUnitAt(x - (i - 1), y - (i - 1)) == null)
+    //             drawMoveTile(x - (i - 1), y - (i - 1));
+    //         // draw diagonal right bot
+    //         if (i >= 2 && gC.isValidPos(x + (i - 1), y - (i - 1)) && gC.GetUnitAt(x + (i - 1), y - (i - 1)) == null)
+    //             drawMoveTile(x + (i - 1), y - (i - 1));
+    //     }
+    // }
 
     private void drawMoveTile(int x, int y)
     {
