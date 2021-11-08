@@ -28,6 +28,8 @@ public class UnitController : MonoBehaviour
     public enum State { WAIT, READY, MOVED, END }
     State state;
     Side side;
+    // bool isChosen = false;
+    // bool isMoved = false;
 
     // Stats
     public enum UType { Villager, Warrior, Armor, Archer }
@@ -49,7 +51,7 @@ public class UnitController : MonoBehaviour
     public void UpdatePos()
     {
         var pos = new Vector3(x, y, -1);
-
+        //isMoved = true;
         this.transform.position = pos;
     }
 
@@ -81,6 +83,7 @@ public class UnitController : MonoBehaviour
         
         if (state == State.READY) {
             //if (this.unitType == UType.Villager)
+            //isMoved = false;
 
             bool onFort = (mapCtrl.GetTerrain(this.GetPos()) == Terrain.Fort);
             if (onFort)
@@ -183,23 +186,23 @@ public class UnitController : MonoBehaviour
 
     void Update() {}
 
-    // public void HandleInput()
-    // {
-    //     if ((Input.touchCount > 0) && (Input.touches[0].phase == TouchPhase.Began))
-    //     {
-    //         Touch touch = Input.touches[0];
-    //         Vector2 touchPos = (Vector2)Camera.main.ScreenToWorldPoint(touch.position);
+    public void HandleInput()
+    {
+        // if ((Input.touchCount > 0) && (Input.touches[0].phase == TouchPhase.Began))
+        // {
+        //     Touch touch = Input.touches[0];
+        //     Vector2 touchPos = (Vector2)Camera.main.ScreenToWorldPoint(touch.position);
 
-    //         if (col == Physics2D.OverlapPoint(touchPos))
-    //         {
-    //             isChosen = true;
-    //         }
-    //         else
-    //         {
-    //             isChosen = false;
-    //         }
-    //     }
-    // }
+        //     if (col == Physics2D.OverlapPoint(touchPos))
+        //     {
+        //         isChosen = true;
+        //     }
+        //     else
+        //     {
+        //         isChosen = false;
+        //     }
+        // }
+    }
 
     private void OnMouseUp()
     {
@@ -211,6 +214,37 @@ public class UnitController : MonoBehaviour
 
             this.initMoveTiles();
         }
+
+
+        // Vector3 mousePos = Input.mousePosition;
+        // Vector2 worldPos = (Vector2)Camera.main.ScreenToWorldPoint(mousePos);
+
+        // if (col == Physics2D.OverlapPoint(worldPos) &&
+        //     !gC.isGameEnd() &&
+        //     gC.getCurPlayer() == this.side &&
+        //     this.state == State.READY &&
+        //     !this.isChosen)
+        //     {
+        //         Debug.Log($"{this.name} clicked");
+
+        //         this.isChosen = true;
+
+        //         this.destroyTiles("Both");
+        //         this.initMoveTiles();
+        //     }
+
+        // else {
+        //     Debug.Log($"{this.name} unclicked");
+        //     this.isChosen = false;
+        //     if (this.isMoved) {
+        //         Debug.Log("move destroy");
+        //         this.destroyTiles("MoveTile");
+        //     }
+        //     else {
+        //         Debug.Log("both destroy");
+        //         this.destroyTiles("Both");
+        //     }
+        // }
     }
 
     public void Die() {

@@ -29,19 +29,28 @@ public class GameController : MonoBehaviour
     public GameObject GetUnitAt(int x, int y) { return boardPos[x, y]; }
     public GameObject GetUnitAt(Vector2Int pos) { return boardPos[pos.x, pos.y]; }
 
-    public void SetUnitAt(int x, int y, GameObject unit) { 
+    public void SetUnitAt(int x, int y, GameObject unit) {
         boardPos[x, y] = unit;
 
-        WinCheck(unit.GetComponent<UnitController>().GetSide());
+        WinCheck();
     }
 
-    void WinCheck(Side player) {
-        if (player == Side.BLUE)
+    void WinCheck() {
+        // killing all enemy units
+        if (blueUnits.Count == 0)
+            endGame(Side.RED);
+        else if (redUnits.Count == 0)
+            endGame(Side.BLUE);
+
+        // reaching enemy base
+        if (curPlayer == Side.BLUE) {
             if (boardPos[7,0] != null && boardPos[7,0].GetComponent<UnitController>().GetSide() == Side.BLUE)
                 endGame(Side.BLUE);
-        else
+        }
+        else {
             if (boardPos[0,7] != null && boardPos[0,7].GetComponent<UnitController>().GetSide() == Side.RED)
                 endGame(Side.RED);
+        }
     }
 
     public void setPositionEmpty(int x, int y) { boardPos[x, y] = null; }
@@ -71,6 +80,7 @@ public class GameController : MonoBehaviour
         CreateUnit("red_warrior", 4, 2);
         CreateUnit("red_armor", 3, 2);
         CreateUnit("red_archer", 2, 2);
+        CreateUnit("red_villager", 1, 7);
     }
 
     void Update()
@@ -113,6 +123,8 @@ public class GameController : MonoBehaviour
         else {
             redUnits.Remove(unit);
         }
+
+        WinCheck();
     }
 
     // --- Turns & Game -----------------
