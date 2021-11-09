@@ -13,26 +13,28 @@ public class AtkTile : MonoBehaviour
     GameObject unit;    // which unit "owns" this atk tile
     UnitController uC;
 
-    int x;
-    int y;
+    public int x;
+    public int y;
 
     // --- Getters & Setters -------------------
     public GameObject getCurrentlyUnitInUsed() { return unit; }
-    public void setUnitOwnAtkTile(GameObject obj) {
+    public void setUnitOwnAtkTile(GameObject obj)
+    {
         unit = obj;
         uC = unit.GetComponent<UnitController>();
     }
 
     //--------------------------------------
     // Awake is called FIRST
-    void Awake() {
+    void Awake()
+    {
         game = GameObject.FindWithTag("GameController");
         gC = game.GetComponent<GameController>();
     }
 
-    void Start() {}
+    void Start() { }
 
-    void Update() {}
+    void Update() { }
 
     //-----------------------------------------
 

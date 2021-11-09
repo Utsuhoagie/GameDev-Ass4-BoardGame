@@ -11,6 +11,8 @@ TagManager:
   - CombatController
   - MainTilemap
   - MapController
+  - AI
+  - InputModule
   layers:
   - Default
   - TransparentFX

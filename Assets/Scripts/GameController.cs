@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour
     List<GameObject> blueUnits = new List<GameObject>();
     List<GameObject> redUnits = new List<GameObject>();
 
-    
+
     public GameObject unitPrefab;
 
     // --- Getters & Setters ------------------
@@ -35,9 +35,15 @@ public class GameController : MonoBehaviour
 
     public Side getCurPlayer() { return this.curPlayer; }
 
+    public GameObject[,] getBoardPos()
+    {
+        return this.boardPos;
+    }
+
     // --- Main --------------------------
     // Awake is called FIRST
-    void Awake() {
+    void Awake()
+    {
         curPlayer = Side.BLUE;
         blueText = GameObject.FindWithTag("BlueText").GetComponent<Text>();
         redText = GameObject.FindWithTag("RedText").GetComponent<Text>();
@@ -92,9 +98,28 @@ public class GameController : MonoBehaviour
         boardPos[uC.GetX(), uC.GetY()] = unit;
     }
 
+    public void removeGameObjFromBlueList(GameObject unit)
+    {
+        var x = unit.GetComponent<UnitController>().GetX();
+        var y = unit.GetComponent<UnitController>().GetY();
+
+        boardPos[x, y] = null;
+        blueUnits.Remove(unit);
+    }
+
+    public void removeGameObjFromRedList(GameObject unit)
+    {
+        var x = unit.GetComponent<UnitController>().GetX();
+        var y = unit.GetComponent<UnitController>().GetY();
+
+        boardPos[x, y] = null;
+        redUnits.Remove(unit);
+    }
+
     // --- Turns & Game -----------------
 
-    public void SetAllState(Side side, State state) {
+    public void SetAllState(Side side, State state)
+    {
         if (side == Side.BLUE)
             foreach (GameObject blueUnit in blueUnits)
                 blueUnit.GetComponent<UnitController>().SetState(state);
@@ -104,7 +129,8 @@ public class GameController : MonoBehaviour
 
     }
 
-    public void DestroyAllTiles(Side side) {
+    public void DestroyAllTiles(Side side)
+    {
         if (side == Side.BLUE)
             foreach (GameObject blueUnit in blueUnits)
                 blueUnit.GetComponent<UnitController>().destroyTiles("Both");
@@ -115,7 +141,8 @@ public class GameController : MonoBehaviour
 
     public void StartBlueTurn()
     {
-        if (curPlayer == Side.RED) {
+        if (curPlayer == Side.RED)
+        {
             DestroyAllTiles(Side.RED);
             SetAllState(Side.RED, State.WAIT);
 
@@ -129,7 +156,8 @@ public class GameController : MonoBehaviour
 
     public void StartRedTurn()
     {
-        if (curPlayer == Side.BLUE) {
+        if (curPlayer == Side.BLUE)
+        {
             DestroyAllTiles(Side.BLUE);
             SetAllState(Side.BLUE, State.WAIT);
 
@@ -138,7 +166,23 @@ public class GameController : MonoBehaviour
             blueText.enabled = false;
 
             SetAllState(Side.RED, State.READY);
+
+
+            GameObject AI = GameObject.FindWithTag("AI");
+            MinimaxAI ai = AI.GetComponent<MinimaxAI>();
+            StartCoroutine(playATurn(ai, 3));
         }
+    }
+
+    IEnumerator playATurn(MinimaxAI ai, int numberOfLoops)
+    {
+        yield return new WaitForSeconds(1);
+
+        ai.playAITurn();
+        if (numberOfLoops > 0)
+            StartCoroutine(playATurn(ai, numberOfLoops - 1));
+        else
+            StartBlueTurn();
     }
 
     public bool isGameEnd() { return this.isGameOver; }
@@ -165,6 +209,6 @@ public class GameController : MonoBehaviour
     {
         if (pos.x < 0 || pos.y < 0 || pos.x >= 8 || pos.y >= 8)
             return false;
-        else return true;        
+        else return true;
     }
 }

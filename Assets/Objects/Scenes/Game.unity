@@ -121,6 +121,51 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &49386993
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 49386995}
+  - component: {fileID: 49386994}
+  m_Layer: 0
+  m_Name: AI
+  m_TagString: AI
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &49386994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 49386993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e0170d12c097ae40a4c06d017a8bd68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameController: {fileID: 704320480}
+  combatController: {fileID: 1334148334}
+--- !u!4 &49386995
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 49386993}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.55583, y: 3.9038253, z: -12.612195}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &70308998
 GameObject:
   m_ObjectHideFlags: 0
@@ -1624,7 +1669,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eed95abaf20dc84ead5a4a79f6ee9a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainTilemap: {fileID: 0}
   plains: {fileID: -6971266520587217513, guid: 32463f6a479611244b81c72ffc0a69e6, type: 3}
   forest: {fileID: 4138603417118373318, guid: 32463f6a479611244b81c72ffc0a69e6, type: 3}
   fort: {fileID: -1770919411176355805, guid: 32463f6a479611244b81c72ffc0a69e6, type: 3}
@@ -2630,7 +2674,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ad7f96fe6f43014e9e2943688157aab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapCtrl: {fileID: 0}
 --- !u!1 &1599655756
 GameObject:
   m_ObjectHideFlags: 0

@@ -23,6 +23,9 @@ public class UnitController : MonoBehaviour
     public GameObject MoveTile;
     public GameObject AtkTile;
 
+    private List<MoveTile> moveTiles = new List<MoveTile>();
+    private List<AtkTile> atkTiles = new List<AtkTile>();
+
     // Gameplay
     public enum State { WAIT, READY, MOVED, END }
     State state;
@@ -40,10 +43,41 @@ public class UnitController : MonoBehaviour
     int y;
 
     // --- Getters & Setters ------------------
+    public int GetMove() { return move; }
     public int GetX() { return x; }
     public int GetY() { return y; }
     public void SetX(int _x) { x = _x; }
     public void SetY(int _y) { y = _y; }
+    public void SetSide(Side _side) { side = _side; }
+    public void SetMove(int _move) { move = _move; }
+    public void SetRange(int _range) { range = _range; }
+
+
+    /// <summary> function for AI use </summary>
+    public void clickMoveTile(int x, int y)
+    {
+        foreach (MoveTile mt in this.moveTiles)
+        {
+            if (mt.x == x && mt.y == y)
+            {
+                mt.OnMouseUp();
+                return;
+            }
+        }
+    }
+
+    /// <summary> function for AI use </summary>
+    public void clickAtkTile(int x, int y)
+    {
+        foreach (AtkTile at in this.atkTiles)
+        {
+            if (at.x == x && at.y == y)
+            {
+                at.OnMouseUp();
+                return;
+            }
+        }
+    }
 
     public void UpdatePos()
     {
@@ -53,16 +87,19 @@ public class UnitController : MonoBehaviour
     }
 
     public UType GetUType() { return this.unitType; }
+    public State GetState() { return this.state; }
     public int GetAtkRange() { return this.range; }
 
     public int GetHP() { return HP; }
-    public void SetHP(int _HP) { 
+    public void SetHP(int _HP)
+    {
         HP = _HP;
 
         textHP.GetComponent<Text>().text = $"{HP}%";
     }
 
-    public void SetState(State _state) { 
+    public void SetState(State _state)
+    {
         state = _state;
 
         if (state == State.END || this.unitType == UType.Villager)
@@ -78,13 +115,15 @@ public class UnitController : MonoBehaviour
 
     public bool isRed() { return side == Side.RED; }
     public Side GetSide() { return side; }
-    public bool isSameSide(UnitController other) { 
+    public bool isSameSide(UnitController other)
+    {
         return side == other.GetSide();
     }
 
     // -----------------------------------
     // Awake is called FIRST
-    void Awake() {
+    void Awake()
+    {
         game = GameObject.FindWithTag("GameController");
         gC = game.GetComponent<GameController>();
 
@@ -99,10 +138,10 @@ public class UnitController : MonoBehaviour
         mapCtrl = GameObject.FindWithTag("MapController").GetComponent<MapController>();
     }
 
-    void Start() {}
+    void Start() { }
 
     public void Activate()
-    {        
+    {
         switch (this.name)
         {
             case "blue_villager":
@@ -147,7 +186,8 @@ public class UnitController : MonoBehaviour
                 break;
         }
 
-        switch(unitType) {
+        switch (unitType)
+        {
             case UType.Villager:
                 move = 3;
                 range = 0;
@@ -172,7 +212,7 @@ public class UnitController : MonoBehaviour
         state = State.READY;
     }
 
-    void Update() {}
+    void Update() { }
 
     // public void HandleInput()
     // {
@@ -204,8 +244,27 @@ public class UnitController : MonoBehaviour
         }
     }
 
-    public void Die() {
+    /// <summary> This function for AI use </summary>
+    public void onAIMouseUp()
+    {
+        if (!gC.isGameEnd() &&
+            gC.getCurPlayer() == this.side &&
+            this.state == State.READY)
+        {
+            this.destroyTiles("Both");
+
+            this.initMoveTiles();
+        }
+    }
+
+    public void Die()
+    {
         //Debug.Log($"{this.name} died!");
+        if (this.side == Side.RED)
+            this.game.GetComponent<GameController>().removeGameObjFromRedList(this.gameObject);
+        else
+            this.game.GetComponent<GameController>().removeGameObjFromBlueList(this.gameObject);
+
         Destroy(this.gameObject);
     }
 
@@ -213,21 +272,22 @@ public class UnitController : MonoBehaviour
 
     public void initMoveTiles()
     {
-        //drawMoveTiles();
-        Vector2Int thisPos = new Vector2Int(this.x, this.y);
+        drawMoveTiles();
+        // Vector2Int thisPos = new Vector2Int(this.x, this.y);
 
-        drawMoveTile(this.x, this.y);
-        FloodFill(thisPos, this.move + 1); // must include initial tile
+        // drawMoveTile(this.x, this.y);
+        // FloodFill(thisPos, this.move + 1); // must include initial tile
         //StartCoroutine(BFS(this.x, this.y, this.move + 1)); // must include initial tile
     }
 
 
 
 
-    private void FloodFill(Vector2Int pos, int moveRemaining) {
+    private void FloodFill(Vector2Int pos, int moveRemaining)
+    {
         int costOfTile = mapCtrl.GetTerrainCost(pos.x, pos.y);
 
-        if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(pos.x, pos.y)) 
+        if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(pos.x, pos.y))
             return;
 
         if (gC.GetUnitAt(pos.x, pos.y) == null)
@@ -242,19 +302,19 @@ public class UnitController : MonoBehaviour
         Vector2Int posD = new Vector2Int(pos.x, pos.y - 1);
 
         // draw left
-        if (gC.isValidPos(posL) && 
+        if (gC.isValidPos(posL) &&
             (gC.GetUnitAt(posL) == null || isSameSide(gC.GetUnitAt(posL).GetComponent<UnitController>())))
             FloodFill(posL, moveRemaining);
         // draw right
-        if (gC.isValidPos(posR) && 
+        if (gC.isValidPos(posR) &&
             (gC.GetUnitAt(posR) == null || isSameSide(gC.GetUnitAt(posR).GetComponent<UnitController>())))
             FloodFill(posR, moveRemaining);
         // draw up
-        if (gC.isValidPos(posU) && 
+        if (gC.isValidPos(posU) &&
             (gC.GetUnitAt(posU) == null || isSameSide(gC.GetUnitAt(posU).GetComponent<UnitController>())))
             FloodFill(posU, moveRemaining);
         // draw down
-        if (gC.isValidPos(posD) && 
+        if (gC.isValidPos(posD) &&
             (gC.GetUnitAt(posD) == null || isSameSide(gC.GetUnitAt(posD).GetComponent<UnitController>())))
             FloodFill(posD, moveRemaining);
 
@@ -291,34 +351,37 @@ public class UnitController : MonoBehaviour
     //         StartCoroutine(BFS(x, y - 1, moveRemaining));
     // }
 
-// frontier = PriorityQueue()
-// frontier.put(start, 0)
-// came_from = dict()
-// cost_so_far = dict()
-// came_from[start] = None
-// cost_so_far[start] = 0
+    // frontier = PriorityQueue()
+    // frontier.put(start, 0)
+    // came_from = dict()
+    // cost_so_far = dict()
+    // came_from[start] = None
+    // cost_so_far[start] = 0
 
-// while not frontier.empty():
-//    current = frontier.get()
+    // while not frontier.empty():
+    //    current = frontier.get()
 
-//    if current == goal:
-//       break
-   
-//    for next in graph.neighbors(current):
-//       new_cost = cost_so_far[current] + graph.cost(current, next)
-//       if next not in cost_so_far or new_cost < cost_so_far[next]:
-//          cost_so_far[next] = new_cost
-//          priority = new_cost
-//          frontier.put(next, priority)
-//          came_from[next] = current
+    //    if current == goal:
+    //       break
 
-    private void BFS2() {
+    //    for next in graph.neighbors(current):
+    //       new_cost = cost_so_far[current] + graph.cost(current, next)
+    //       if next not in cost_so_far or new_cost < cost_so_far[next]:
+    //          cost_so_far[next] = new_cost
+    //          priority = new_cost
+    //          frontier.put(next, priority)
+    //          came_from[next] = current
+
+    private void BFS2()
+    {
         //var frontier = new PriorityQueue<Vector3Int, int>();
     }
 
 
     private void drawMoveTiles()
     {
+        this.moveTiles.Clear();
+
         // TODO: CHANGE WITH FLOOD FILL!!!!
 
         drawMoveTile(x, y);
@@ -360,51 +423,55 @@ public class UnitController : MonoBehaviour
         MoveTile mvTile = mP.GetComponent<MoveTile>();
         mvTile.setUnitOwnMoveTile(this.gameObject);
         mvTile.setWorldPosition(x, y);
+
+        this.moveTiles.Add(mvTile);
     }
 
 
     private void drawAtkTiles()
     {
+        this.atkTiles.Clear();
 
         // draw left
-        if (gC.isValidPos(x - this.range, y) && 
-            gC.GetUnitAt(x - this.range, y) != null && 
+        if (gC.isValidPos(x - this.range, y) &&
+            gC.GetUnitAt(x - this.range, y) != null &&
             !isSameSide(gC.GetUnitAt(x - this.range, y).GetComponent<UnitController>()))
             drawAtkTile(x - this.range, y);
         // draw up
-        if (gC.isValidPos(x + this.range, y) && 
+        if (gC.isValidPos(x + this.range, y) &&
             gC.GetUnitAt(x + this.range, y) != null &&
             !isSameSide(gC.GetUnitAt(x + this.range, y).GetComponent<UnitController>()))
             drawAtkTile(x + this.range, y);
         // draw right
-        if (gC.isValidPos(x, y + this.range) && 
+        if (gC.isValidPos(x, y + this.range) &&
             gC.GetUnitAt(x, y + this.range) != null &&
             !isSameSide(gC.GetUnitAt(x, y + this.range).GetComponent<UnitController>()))
             drawAtkTile(x, y + this.range);
         // draw down
-        if (gC.isValidPos(x, y - this.range) && 
+        if (gC.isValidPos(x, y - this.range) &&
             gC.GetUnitAt(x, y - this.range) != null &&
             !isSameSide(gC.GetUnitAt(x, y - this.range).GetComponent<UnitController>()))
             drawAtkTile(x, y - this.range);
 
-        if (this.range == 2) {
+        if (this.range == 2)
+        {
             // draw diagonal left top
             if (gC.isValidPos(x - 1, y + 1) &&
                 gC.GetUnitAt(x - 1, y + 1) != null &&
                 !isSameSide(gC.GetUnitAt(x - 1, y + 1).GetComponent<UnitController>()))
                 drawAtkTile(x - 1, y + 1);
             // draw diagonal right top
-            if (gC.isValidPos(x + 1, y + 1) && 
+            if (gC.isValidPos(x + 1, y + 1) &&
                 gC.GetUnitAt(x + 1, y + 1) != null &&
                 !isSameSide(gC.GetUnitAt(x + 1, y + 1).GetComponent<UnitController>()))
                 drawAtkTile(x + 1, y + 1);
             // draw diagonal left bot
-            if (gC.isValidPos(x - 1, y - 1) && 
+            if (gC.isValidPos(x - 1, y - 1) &&
                 gC.GetUnitAt(x - 1, y - 1) != null &&
                 !isSameSide(gC.GetUnitAt(x - 1, y - 1).GetComponent<UnitController>()))
                 drawAtkTile(x - 1, y - 1);
             // draw diagonal right bot
-            if (gC.isValidPos(x + 1, y - 1) && 
+            if (gC.isValidPos(x + 1, y - 1) &&
                 gC.GetUnitAt(x + 1, y - 1) != null &&
                 !isSameSide(gC.GetUnitAt(x + 1, y - 1).GetComponent<UnitController>()))
                 drawAtkTile(x + 1, y - 1);
@@ -418,17 +485,21 @@ public class UnitController : MonoBehaviour
         AtkTile atkTile = aP.GetComponent<AtkTile>();
         atkTile.setUnitOwnAtkTile(this.gameObject);
         atkTile.setWorldPosition(x, y);
+
+        this.atkTiles.Add(atkTile);
     }
 
 
     public void destroyTiles(string toDestroy)
     {
-        if (toDestroy == "MoveTile" || toDestroy == "Both") {
+        if (toDestroy == "MoveTile" || toDestroy == "Both")
+        {
             GameObject[] mvTiles = GameObject.FindGameObjectsWithTag("MoveTile");
             foreach (GameObject mvTile in mvTiles)
                 Destroy(mvTile);
         }
-        if (toDestroy == "AtkTile" || toDestroy == "Both") {
+        if (toDestroy == "AtkTile" || toDestroy == "Both")
+        {
             GameObject[] atkTiles = GameObject.FindGameObjectsWithTag("AtkTile");
             foreach (GameObject atkTile in atkTiles)
                 Destroy(atkTile);
