@@ -29,7 +29,33 @@ public class GameController : MonoBehaviour
     public GameObject GetUnitAt(int x, int y) { return boardPos[x, y]; }
     public GameObject GetUnitAt(Vector2Int pos) { return boardPos[pos.x, pos.y]; }
 
-    public void SetUnitAt(int x, int y, GameObject unit) { boardPos[x, y] = unit; }
+    public void SetUnitAt(int x, int y, GameObject unit)
+    {
+        boardPos[x, y] = unit;
+
+        WinCheck();
+    }
+
+    void WinCheck()
+    {
+        // killing all enemy units
+        if (blueUnits.Count == 0)
+            endGame(Side.RED);
+        else if (redUnits.Count == 0)
+            endGame(Side.BLUE);
+
+        // reaching enemy base
+        if (curPlayer == Side.BLUE)
+        {
+            if (boardPos[7, 0] != null && boardPos[7, 0].GetComponent<UnitController>().GetSide() == Side.BLUE)
+                endGame(Side.BLUE);
+        }
+        else
+        {
+            if (boardPos[0, 7] != null && boardPos[0, 7].GetComponent<UnitController>().GetSide() == Side.RED)
+                endGame(Side.RED);
+        }
+    }
 
     public void setPositionEmpty(int x, int y) { boardPos[x, y] = null; }
 
@@ -55,14 +81,16 @@ public class GameController : MonoBehaviour
         blueText.enabled = true;
         redText.enabled = false;
 
-        CreateUnit("blue_villager", 2, 4);
-        CreateUnit("blue_warrior", 3, 4);
-        CreateUnit("blue_armor", 4, 4);
-        CreateUnit("blue_archer", 5, 4);
+        CreateUnit("blue_villager", 2, 5);
+        CreateUnit("blue_warrior", 3, 5);
+        CreateUnit("blue_armor", 4, 5);
+        CreateUnit("blue_archer", 5, 5);
+        CreateUnit("blue_villager", 7, 1);
         CreateUnit("red_villager", 5, 2);
         CreateUnit("red_warrior", 4, 2);
         CreateUnit("red_armor", 3, 2);
         CreateUnit("red_archer", 2, 2);
+        CreateUnit("red_villager", 1, 7);
     }
 
     void Update()
@@ -98,22 +126,19 @@ public class GameController : MonoBehaviour
         boardPos[uC.GetX(), uC.GetY()] = unit;
     }
 
-    public void removeGameObjFromBlueList(GameObject unit)
+    public void RemoveUnitFromGame(GameObject unit)
     {
-        var x = unit.GetComponent<UnitController>().GetX();
-        var y = unit.GetComponent<UnitController>().GetY();
+        if (unit.GetComponent<UnitController>().GetSide() == Side.BLUE)
+        {
+            blueUnits.Remove(unit);
+        }
+        else
+        {
+            redUnits.Remove(unit);
+        }
+        boardPos[unit.GetComponent<UnitController>().GetX(), unit.GetComponent<UnitController>().GetY()] = null;
 
-        boardPos[x, y] = null;
-        blueUnits.Remove(unit);
-    }
-
-    public void removeGameObjFromRedList(GameObject unit)
-    {
-        var x = unit.GetComponent<UnitController>().GetX();
-        var y = unit.GetComponent<UnitController>().GetY();
-
-        boardPos[x, y] = null;
-        redUnits.Remove(unit);
+        WinCheck();
     }
 
     // --- Turns & Game -----------------
@@ -170,7 +195,8 @@ public class GameController : MonoBehaviour
 
             GameObject AI = GameObject.FindWithTag("AI");
             MinimaxAI ai = AI.GetComponent<MinimaxAI>();
-            StartCoroutine(playATurn(ai, 3));
+            int numOfUnits = this.redUnits.Count;
+            StartCoroutine(playATurn(ai, numOfUnits));
         }
     }
 
@@ -179,7 +205,7 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(1);
 
         ai.playAITurn();
-        if (numberOfLoops > 0)
+        if (numberOfLoops > 1)
             StartCoroutine(playATurn(ai, numberOfLoops - 1));
         else
             StartBlueTurn();
@@ -191,9 +217,11 @@ public class GameController : MonoBehaviour
     {
         this.isGameOver = true;
 
-        // TODO:
-        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().enabled = true;
-        GameObject.FindGameObjectWithTag("LeftText").GetComponent<Text>().text = $"{winner} wins!";
+        if (winner == Side.BLUE)
+            blueText.text = $"BLUE Wins!";
+        else
+            redText.text = $"RED Wins!";
+
     }
 
 

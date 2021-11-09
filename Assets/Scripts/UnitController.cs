@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Side = GameController.Side;
+using Terrain = MapTile.Terrain;
 
 public class UnitController : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class UnitController : MonoBehaviour
     Collider2D col;
     SpriteRenderer spRend;
     GameObject textHP;
+    GameObject healImg;
     MapController mapCtrl;
 
     // References to unit sprites
@@ -30,6 +32,8 @@ public class UnitController : MonoBehaviour
     public enum State { WAIT, READY, MOVED, END }
     State state;
     Side side;
+    // bool isChosen = false;
+    // bool isMoved = false;
 
     // Stats
     public enum UType { Villager, Warrior, Armor, Archer }
@@ -64,6 +68,8 @@ public class UnitController : MonoBehaviour
                 return;
             }
         }
+
+        Debug.Log("No move tile found at " + x + ", " + y);
     }
 
     /// <summary> function for AI use </summary>
@@ -77,12 +83,15 @@ public class UnitController : MonoBehaviour
                 return;
             }
         }
+
+        Debug.Log("No atk tile found at " + x + ", " + y);
     }
 
+    public Vector2Int GetPos() { return new Vector2Int(x, y); }
     public void UpdatePos()
     {
         var pos = new Vector3(x, y, -1);
-
+        //isMoved = true;
         this.transform.position = pos;
     }
 
@@ -102,7 +111,10 @@ public class UnitController : MonoBehaviour
     {
         state = _state;
 
-        if (state == State.END || this.unitType == UType.Villager)
+        if (state == State.END)
+            mapCtrl.ResetVisit();
+
+        if (state == State.END)
             spRend.color = new Color(0.4f, 0.4f, 0.4f, 1.0f);
         else if (state == State.MOVED)
             spRend.color = new Color(0.8f, 0.8f, 0.8f, 1.0f);
@@ -111,6 +123,27 @@ public class UnitController : MonoBehaviour
 
         if (state == State.MOVED)
             drawAtkTiles();
+
+        if (state == State.READY)
+        {
+            //if (this.unitType == UType.Villager)
+            //isMoved = false;
+
+            bool onFort = (mapCtrl.GetTerrain(this.GetPos()) == Terrain.Fort);
+            if (onFort)
+            {
+                SetHP(Mathf.Clamp(this.HP + 20, 0, 100));
+                StartCoroutine(Heal());
+
+            }
+        }
+    }
+    IEnumerator Heal()
+    {
+        healImg.SetActive(true);
+        yield return new WaitForSeconds(0.8f);
+        healImg.SetActive(false);
+        yield break;
     }
 
     public bool isRed() { return side == Side.RED; }
@@ -130,10 +163,8 @@ public class UnitController : MonoBehaviour
         col = GetComponent<Collider2D>();
         spRend = GetComponent<SpriteRenderer>();
 
-        if (transform.Find("Canvas/HP") == null)
-            Debug.Log("NULL!!!!");
-
         textHP = transform.Find("Canvas/HP").gameObject;
+        healImg = transform.Find("Canvas/Heal").gameObject;
 
         mapCtrl = GameObject.FindWithTag("MapController").GetComponent<MapController>();
     }
@@ -214,23 +245,23 @@ public class UnitController : MonoBehaviour
 
     void Update() { }
 
-    // public void HandleInput()
-    // {
-    //     if ((Input.touchCount > 0) && (Input.touches[0].phase == TouchPhase.Began))
-    //     {
-    //         Touch touch = Input.touches[0];
-    //         Vector2 touchPos = (Vector2)Camera.main.ScreenToWorldPoint(touch.position);
+    public void HandleInput()
+    {
+        // if ((Input.touchCount > 0) && (Input.touches[0].phase == TouchPhase.Began))
+        // {
+        //     Touch touch = Input.touches[0];
+        //     Vector2 touchPos = (Vector2)Camera.main.ScreenToWorldPoint(touch.position);
 
-    //         if (col == Physics2D.OverlapPoint(touchPos))
-    //         {
-    //             isChosen = true;
-    //         }
-    //         else
-    //         {
-    //             isChosen = false;
-    //         }
-    //     }
-    // }
+        //     if (col == Physics2D.OverlapPoint(touchPos))
+        //     {
+        //         isChosen = true;
+        //     }
+        //     else
+        //     {
+        //         isChosen = false;
+        //     }
+        // }
+    }
 
     private void OnMouseUp()
     {
@@ -242,6 +273,37 @@ public class UnitController : MonoBehaviour
 
             this.initMoveTiles();
         }
+
+
+        // Vector3 mousePos = Input.mousePosition;
+        // Vector2 worldPos = (Vector2)Camera.main.ScreenToWorldPoint(mousePos);
+
+        // if (col == Physics2D.OverlapPoint(worldPos) &&
+        //     !gC.isGameEnd() &&
+        //     gC.getCurPlayer() == this.side &&
+        //     this.state == State.READY &&
+        //     !this.isChosen)
+        //     {
+        //         Debug.Log($"{this.name} clicked");
+
+        //         this.isChosen = true;
+
+        //         this.destroyTiles("Both");
+        //         this.initMoveTiles();
+        //     }
+
+        // else {
+        //     Debug.Log($"{this.name} unclicked");
+        //     this.isChosen = false;
+        //     if (this.isMoved) {
+        //         Debug.Log("move destroy");
+        //         this.destroyTiles("MoveTile");
+        //     }
+        //     else {
+        //         Debug.Log("both destroy");
+        //         this.destroyTiles("Both");
+        //     }
+        // }
     }
 
     /// <summary> This function for AI use </summary>
@@ -259,12 +321,7 @@ public class UnitController : MonoBehaviour
 
     public void Die()
     {
-        //Debug.Log($"{this.name} died!");
-        if (this.side == Side.RED)
-            this.game.GetComponent<GameController>().removeGameObjFromRedList(this.gameObject);
-        else
-            this.game.GetComponent<GameController>().removeGameObjFromBlueList(this.gameObject);
-
+        gC.RemoveUnitFromGame(this.gameObject);
         Destroy(this.gameObject);
     }
 
@@ -272,28 +329,31 @@ public class UnitController : MonoBehaviour
 
     public void initMoveTiles()
     {
-        drawMoveTiles();
-        // Vector2Int thisPos = new Vector2Int(this.x, this.y);
+        Vector2Int thisPos = new Vector2Int(this.x, this.y);
 
-        // drawMoveTile(this.x, this.y);
-        // FloodFill(thisPos, this.move + 1); // must include initial tile
-        //StartCoroutine(BFS(this.x, this.y, this.move + 1)); // must include initial tile
+        mapCtrl.ResetVisit();
+        FloodFill(thisPos, this.move);
     }
-
-
 
 
     private void FloodFill(Vector2Int pos, int moveRemaining)
     {
-        int costOfTile = mapCtrl.GetTerrainCost(pos.x, pos.y);
+        int costOfTile = mapCtrl.GetTerrainCost(pos);
 
-        if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(pos.x, pos.y))
+        if (moveRemaining == 0 || moveRemaining < costOfTile || (mapCtrl.IsVisited(pos) && pos != this.GetPos()))
             return;
 
-        if (gC.GetUnitAt(pos.x, pos.y) == null)
+
+
+        if (gC.isValidPos(pos) &&
+            (gC.GetUnitAt(pos) == null || gC.GetUnitAt(pos) == this.gameObject))
+
             drawMoveTile(pos.x, pos.y);
+
         mapCtrl.Visit(pos.x, pos.y);
-        moveRemaining -= costOfTile;
+
+        if (pos != new Vector2Int(this.x, this.y))
+            moveRemaining -= costOfTile;
 
 
         Vector2Int posL = new Vector2Int(pos.x - 1, pos.y);
@@ -301,120 +361,56 @@ public class UnitController : MonoBehaviour
         Vector2Int posU = new Vector2Int(pos.x, pos.y + 1);
         Vector2Int posD = new Vector2Int(pos.x, pos.y - 1);
 
-        // draw left
-        if (gC.isValidPos(posL) &&
-            (gC.GetUnitAt(posL) == null || isSameSide(gC.GetUnitAt(posL).GetComponent<UnitController>())))
-            FloodFill(posL, moveRemaining);
-        // draw right
-        if (gC.isValidPos(posR) &&
-            (gC.GetUnitAt(posR) == null || isSameSide(gC.GetUnitAt(posR).GetComponent<UnitController>())))
-            FloodFill(posR, moveRemaining);
-        // draw up
-        if (gC.isValidPos(posU) &&
-            (gC.GetUnitAt(posU) == null || isSameSide(gC.GetUnitAt(posU).GetComponent<UnitController>())))
-            FloodFill(posU, moveRemaining);
-        // draw down
-        if (gC.isValidPos(posD) &&
-            (gC.GetUnitAt(posD) == null || isSameSide(gC.GetUnitAt(posD).GetComponent<UnitController>())))
-            FloodFill(posD, moveRemaining);
+        Queue<Vector2Int> q = new Queue<Vector2Int>();
+        q.Enqueue(posL); q.Enqueue(posR); q.Enqueue(posU); q.Enqueue(posD);
 
-        mapCtrl.ResetVisit();
-    }
-
-    // private IEnumerator BFS(int x, int y, int moveRemaining) {
-    //     WaitForSeconds wait = new WaitForSeconds(0.4f);
-
-    //     int costOfTile = mapCtrl.GetTerrainCost(x,y);
-
-    //     if (moveRemaining == 0 || moveRemaining < costOfTile || mapCtrl.IsVisited(x,y)) {
-    //         //mapCtrl.ResetVisit();
-    //         yield break;
-    //     }
-
-    //     yield return wait;
-
-    //     drawMoveTile(x, y);
-    //     mapCtrl.Visit(x, y);
-    //     moveRemaining -= costOfTile;
-
-    //     // draw left
-    //     if (gC.isValidPos(x - 1, y) && gC.GetUnitAt(x - 1, y) == null)
-    //         StartCoroutine(BFS(x - 1, y, moveRemaining));
-    //     // draw up
-    //     if (gC.isValidPos(x + 1, y) && gC.GetUnitAt(x + 1, y) == null)
-    //         StartCoroutine(BFS(x + 1, y, moveRemaining));
-    //     // draw right
-    //     if (gC.isValidPos(x, y + 1) && gC.GetUnitAt(x, y + 1) == null)
-    //         StartCoroutine(BFS(x, y + 1, moveRemaining));
-    //     // draw down
-    //     if (gC.isValidPos(x, y - 1) && gC.GetUnitAt(x, y - 1) == null)
-    //         StartCoroutine(BFS(x, y - 1, moveRemaining));
-    // }
-
-    // frontier = PriorityQueue()
-    // frontier.put(start, 0)
-    // came_from = dict()
-    // cost_so_far = dict()
-    // came_from[start] = None
-    // cost_so_far[start] = 0
-
-    // while not frontier.empty():
-    //    current = frontier.get()
-
-    //    if current == goal:
-    //       break
-
-    //    for next in graph.neighbors(current):
-    //       new_cost = cost_so_far[current] + graph.cost(current, next)
-    //       if next not in cost_so_far or new_cost < cost_so_far[next]:
-    //          cost_so_far[next] = new_cost
-    //          priority = new_cost
-    //          frontier.put(next, priority)
-    //          came_from[next] = current
-
-    private void BFS2()
-    {
-        //var frontier = new PriorityQueue<Vector3Int, int>();
-    }
-
-
-    private void drawMoveTiles()
-    {
-        this.moveTiles.Clear();
-
-        // TODO: CHANGE WITH FLOOD FILL!!!!
-
-        drawMoveTile(x, y);
-
-        for (int i = 1; i <= move; i++)
+        while (q.Count > 0)
         {
-            // draw left
-            if (gC.isValidPos(x - i, y) && gC.GetUnitAt(x - i, y) == null)
-                drawMoveTile(x - i, y);
-            // draw up
-            if (gC.isValidPos(x + i, y) && gC.GetUnitAt(x + i, y) == null)
-                drawMoveTile(x + i, y);
-            // draw right
-            if (gC.isValidPos(x, y + i) && gC.GetUnitAt(x, y + i) == null)
-                drawMoveTile(x, y + i);
-            // draw down
-            if (gC.isValidPos(x, y - i) && gC.GetUnitAt(x, y - i) == null)
-                drawMoveTile(x, y - i);
+            Vector2Int posToVisit = q.Dequeue();
 
-            // draw diagonal left top
-            if (i >= 2 && gC.isValidPos(x - (i - 1), y + (i - 1)) && gC.GetUnitAt(x - (i - 1), y + (i - 1)) == null)
-                drawMoveTile(x - (i - 1), y + (i - 1));
-            // draw diagonal right top
-            if (i >= 2 && gC.isValidPos(x + (i - 1), y + (i - 1)) && gC.GetUnitAt(x + (i - 1), y + (i - 1)) == null)
-                drawMoveTile(x + (i - 1), y + (i - 1));
-            // draw diagonal left bot
-            if (i >= 2 && gC.isValidPos(x - (i - 1), y - (i - 1)) && gC.GetUnitAt(x - (i - 1), y - (i - 1)) == null)
-                drawMoveTile(x - (i - 1), y - (i - 1));
-            // draw diagonal right bot
-            if (i >= 2 && gC.isValidPos(x + (i - 1), y - (i - 1)) && gC.GetUnitAt(x + (i - 1), y - (i - 1)) == null)
-                drawMoveTile(x + (i - 1), y - (i - 1));
+            if (gC.isValidPos(posToVisit) && !mapCtrl.IsVisited(posToVisit) &&
+               (gC.GetUnitAt(pos) == null || isSameSide(gC.GetUnitAt(pos).GetComponent<UnitController>())))
+            {
+                FloodFill(posToVisit, moveRemaining);
+            }
         }
     }
+
+    // private void drawMoveTiles()
+    // {
+    //     // TODO: CHANGE WITH FLOOD FILL!!!!
+
+    //     drawMoveTile(x, y);
+
+    //     for (int i = 1; i <= move; i++)
+    //     {
+    //         // draw left
+    //         if (gC.isValidPos(x - i, y) && gC.GetUnitAt(x - i, y) == null)
+    //             drawMoveTile(x - i, y);
+    //         // draw up
+    //         if (gC.isValidPos(x + i, y) && gC.GetUnitAt(x + i, y) == null)
+    //             drawMoveTile(x + i, y);
+    //         // draw right
+    //         if (gC.isValidPos(x, y + i) && gC.GetUnitAt(x, y + i) == null)
+    //             drawMoveTile(x, y + i);
+    //         // draw down
+    //         if (gC.isValidPos(x, y - i) && gC.GetUnitAt(x, y - i) == null)
+    //             drawMoveTile(x, y - i);
+
+    //         // draw diagonal left top
+    //         if (i >= 2 && gC.isValidPos(x - (i - 1), y + (i - 1)) && gC.GetUnitAt(x - (i - 1), y + (i - 1)) == null)
+    //             drawMoveTile(x - (i - 1), y + (i - 1));
+    //         // draw diagonal right top
+    //         if (i >= 2 && gC.isValidPos(x + (i - 1), y + (i - 1)) && gC.GetUnitAt(x + (i - 1), y + (i - 1)) == null)
+    //             drawMoveTile(x + (i - 1), y + (i - 1));
+    //         // draw diagonal left bot
+    //         if (i >= 2 && gC.isValidPos(x - (i - 1), y - (i - 1)) && gC.GetUnitAt(x - (i - 1), y - (i - 1)) == null)
+    //             drawMoveTile(x - (i - 1), y - (i - 1));
+    //         // draw diagonal right bot
+    //         if (i >= 2 && gC.isValidPos(x + (i - 1), y - (i - 1)) && gC.GetUnitAt(x + (i - 1), y - (i - 1)) == null)
+    //             drawMoveTile(x + (i - 1), y - (i - 1));
+    //     }
+    // }
 
     private void drawMoveTile(int x, int y)
     {

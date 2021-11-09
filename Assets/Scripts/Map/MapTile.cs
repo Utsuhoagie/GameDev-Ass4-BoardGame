@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class MapTile : Tile {
-        
+
     public enum Terrain { Plains, Forest, Fort, BlueFort, RedFort, Base, BFlag, RFlag, Unmovable }
     Terrain terrain;
     
@@ -15,13 +15,9 @@ public class MapTile : Tile {
     int mvCost;
     Sprite _sprite;
 
-    // Below is needed for Breadth First Searching
-    public bool IsExplored { get; set; }
-
-    public MapTile ExploredFrom { get; set; }
-
     // ---- Getters & Setters -----------------------
 
+    public Terrain GetTerrain() { return terrain; }
     public float GetDef() { return def; }
     public int GetCost() { return mvCost; }
 

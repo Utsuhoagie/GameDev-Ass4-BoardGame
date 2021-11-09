@@ -36,8 +36,8 @@ public class CombatController : MonoBehaviour
 
         float baseDmg = damage[(int)attacker.GetUType(), (int)defender.GetUType()];
         float HP_modifier = (float)aHP / 100;
-        float aDef = mapCtrl.GetTerrainDef(attacker.GetX(), attacker.GetY());
-        float dDef = mapCtrl.GetTerrainDef(defender.GetX(), defender.GetY());
+        float aDef = mapCtrl.GetTerrainDef(attacker.GetPos());
+        float dDef = mapCtrl.GetTerrainDef(defender.GetPos());
 
         int atkDmg = Mathf.RoundToInt(baseDmg * HP_modifier * dDef);
 
@@ -77,8 +77,8 @@ public class CombatController : MonoBehaviour
 
         float baseDmg = damage[(int)attacker.GetUType(), (int)defender.GetUType()];
         float HP_modifier = (float)aHP / 100;
-        float aDef = mapCtrl.GetTerrainDef(attacker.GetX(), attacker.GetY());
-        float dDef = mapCtrl.GetTerrainDef(defender.GetX(), defender.GetY());
+        float aDef = mapCtrl.GetTerrainDef(attacker.GetPos());
+        float dDef = mapCtrl.GetTerrainDef(defender.GetPos());
 
         int atkDmg = Mathf.RoundToInt(baseDmg * HP_modifier * dDef);
         defender.SetHP(dHP - atkDmg);
@@ -96,6 +96,9 @@ public class CombatController : MonoBehaviour
 
                 int defDmg = Mathf.RoundToInt(baseDmg * HP_modifier * aDef);
                 attacker.SetHP(aHP - defDmg);
+
+                if (attacker.GetHP() <= 0)
+                    attacker.Die();
             }
         }
     }
@@ -108,8 +111,8 @@ public class CombatController : MonoBehaviour
 
         float baseDmg = damage[(int)attacker.unitType, (int)defender.unitType];
         float HP_modifier = (float)aHP / 100;
-        float aDef = mapCtrl.GetTerrainDef(attacker.x, attacker.y);
-        float dDef = mapCtrl.GetTerrainDef(defender.x, defender.y);
+        float aDef = mapCtrl.GetTerrainDef(new Vector2Int(attacker.x, attacker.y));
+        float dDef = mapCtrl.GetTerrainDef(new Vector2Int(defender.x, defender.y));
 
         int atkDmg = Mathf.RoundToInt(baseDmg * HP_modifier * dDef);
         defender.HP = dHP - atkDmg;

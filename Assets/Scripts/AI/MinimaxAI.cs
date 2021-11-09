@@ -74,13 +74,6 @@ public class MinimaxAI : MonoBehaviour
                 break;
         }
 
-        //TODO: fix error while scores null
-        if (scores.Count == 0)
-        {
-            Debug.Log("AI: scores is null");
-            return;
-        }
-
         // choose the best move
         scores.Sort((x, y) => y.First.CompareTo(x.First));
         Move bestMove = scores[0].Second;
