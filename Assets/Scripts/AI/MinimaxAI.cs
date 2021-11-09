@@ -10,6 +10,7 @@ public class MinimaxAI : MonoBehaviour
 {
     public GameObject gameController;
     public GameObject combatController;
+    public GameObject mapCtrl;
 
     private Unit[,] stimulateBoard;
 
@@ -313,37 +314,79 @@ public class MinimaxAI : MonoBehaviour
     {
         List<int[]> moveList = new List<int[]>();
 
-        moveList.Add(new int[] { x, y });
-        for (int i = 1; i <= board[x, y].move; i++)
-        {
-            // draw left
-            if (this.isValidPos(board, x - i, y) && board[x - i, y] == null)
-                moveList.Add(new int[] { x - i, y });
-            // draw up
-            if (this.isValidPos(board, x + i, y) && board[x + i, y] == null)
-                moveList.Add(new int[] { x + i, y });
-            // draw right
-            if (this.isValidPos(board, x, y + i) && board[x, y + i] == null)
-                moveList.Add(new int[] { x, y + i });
-            // draw down
-            if (this.isValidPos(board, x, y - i) && board[x, y - i] == null)
-                moveList.Add(new int[] { x, y - i });
+        FloodFill(new Vector2Int(x, y), board[x, y].move, moveList, new Vector2Int(x, y), board);
 
-            // draw diagonal left top
-            if (i >= 2 && this.isValidPos(board, x - (i - 1), y + (i - 1)) && board[x - (i - 1), y + (i - 1)] == null)
-                moveList.Add(new int[] { x - (i - 1), y + (i - 1) });
-            // draw diagonal right top
-            if (i >= 2 && this.isValidPos(board, x + (i - 1), y + (i - 1)) && board[x + (i - 1), y + (i - 1)] == null)
-                moveList.Add(new int[] { x + (i - 1), y + (i - 1) });
-            // draw diagonal left bot
-            if (i >= 2 && this.isValidPos(board, x - (i - 1), y - (i - 1)) && board[x - (i - 1), y - (i - 1)] == null)
-                moveList.Add(new int[] { x - (i - 1), y - (i - 1) });
-            // draw diagonal right bot
-            if (i >= 2 && this.isValidPos(board, x + (i - 1), y - (i - 1)) && board[x + (i - 1), y - (i - 1)] == null)
-                moveList.Add(new int[] { x + (i - 1), y - (i - 1) });
-        }
+        // moveList.Add(new int[] { x, y });
+        // for (int i = 1; i <= board[x, y].move; i++)
+        // {
+        //     // draw left
+        //     if (this.isValidPos(board, x - i, y) && board[x - i, y] == null)
+        //         moveList.Add(new int[] { x - i, y });
+        //     // draw up
+        //     if (this.isValidPos(board, x + i, y) && board[x + i, y] == null)
+        //         moveList.Add(new int[] { x + i, y });
+        //     // draw right
+        //     if (this.isValidPos(board, x, y + i) && board[x, y + i] == null)
+        //         moveList.Add(new int[] { x, y + i });
+        //     // draw down
+        //     if (this.isValidPos(board, x, y - i) && board[x, y - i] == null)
+        //         moveList.Add(new int[] { x, y - i });
+
+        //     // draw diagonal left top
+        //     if (i >= 2 && this.isValidPos(board, x - (i - 1), y + (i - 1)) && board[x - (i - 1), y + (i - 1)] == null)
+        //         moveList.Add(new int[] { x - (i - 1), y + (i - 1) });
+        //     // draw diagonal right top
+        //     if (i >= 2 && this.isValidPos(board, x + (i - 1), y + (i - 1)) && board[x + (i - 1), y + (i - 1)] == null)
+        //         moveList.Add(new int[] { x + (i - 1), y + (i - 1) });
+        //     // draw diagonal left bot
+        //     if (i >= 2 && this.isValidPos(board, x - (i - 1), y - (i - 1)) && board[x - (i - 1), y - (i - 1)] == null)
+        //         moveList.Add(new int[] { x - (i - 1), y - (i - 1) });
+        //     // draw diagonal right bot
+        //     if (i >= 2 && this.isValidPos(board, x + (i - 1), y - (i - 1)) && board[x + (i - 1), y - (i - 1)] == null)
+        //         moveList.Add(new int[] { x + (i - 1), y - (i - 1) });
+        // }
 
         return moveList;
+    }
+
+    private void FloodFill(Vector2Int pos, int moveRemaining, List<int[]> moveList, Vector2Int originPos, Unit[,] board)
+    {
+        int costOfTile = mapCtrl.GetComponent<MapController>().GetTerrainCost(pos);
+
+        if (moveRemaining == 0 || moveRemaining < costOfTile || (moveList.Contains(new int[] { pos.x, pos.y }) && pos != originPos))
+            return;
+
+
+
+        if (this.isValidPos(board, pos.x, pos.y) &&
+            (board[pos.x, pos.y] == null || pos == originPos))
+
+            moveList.Add(new int[] { pos.x, pos.y });
+
+        // mapCtrl.Visit(pos.x, pos.y);
+
+        if (pos != originPos)
+            moveRemaining -= costOfTile;
+
+
+        Vector2Int posL = new Vector2Int(pos.x - 1, pos.y);
+        Vector2Int posR = new Vector2Int(pos.x + 1, pos.y);
+        Vector2Int posU = new Vector2Int(pos.x, pos.y + 1);
+        Vector2Int posD = new Vector2Int(pos.x, pos.y - 1);
+
+        Queue<Vector2Int> q = new Queue<Vector2Int>();
+        q.Enqueue(posL); q.Enqueue(posR); q.Enqueue(posU); q.Enqueue(posD);
+
+        while (q.Count > 0)
+        {
+            Vector2Int posToVisit = q.Dequeue();
+
+            if (isValidPos(board, posToVisit.x, posToVisit.y) && !moveList.Contains(new int[] { posToVisit.x, posToVisit.y }) &&
+               (board[pos.x, pos.y] == null || board[originPos.x, originPos.y].isSameSide(board[pos.x, pos.y])))
+            {
+                FloodFill(posToVisit, moveRemaining, moveList, originPos, board);
+            }
+        }
     }
 
     private bool isValidPos(Unit[,] board, int x, int y)
