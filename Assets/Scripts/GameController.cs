@@ -103,16 +103,25 @@ public class GameController : MonoBehaviour
         blueText.enabled = true;
         redText.enabled = false;
 
-        CreateUnit("blue_villager", 2, 5);
-        CreateUnit("blue_warrior", 3, 5);
-        CreateUnit("blue_armor", 4, 5);
-        CreateUnit("blue_archer", 5, 5);
-        CreateUnit("blue_villager", 7, 1);
-        CreateUnit("red_villager", 5, 2);
-        CreateUnit("red_warrior", 4, 2);
-        CreateUnit("red_armor", 3, 2);
-        CreateUnit("red_archer", 2, 2);
-        CreateUnit("red_villager", 1, 7);
+        // CreateUnit("blue_villager", 2, 5);
+        // CreateUnit("blue_warrior", 3, 5);
+        // CreateUnit("blue_armor", 4, 5);
+        // CreateUnit("blue_archer", 5, 5);
+        // CreateUnit("blue_villager", 7, 1);
+        // CreateUnit("red_villager", 5, 2);
+        // CreateUnit("red_warrior", 4, 2);
+        // CreateUnit("red_armor", 3, 2);
+        // CreateUnit("red_archer", 2, 2);
+        // CreateUnit("red_villager", 1, 7);
+
+        CreateUnit("blue_villager", 1, 2);
+        CreateUnit("blue_archer", 0, 4);
+        CreateUnit("blue_armor", 2, 3);
+        CreateUnit("blue_warrior", 3, 2);
+        CreateUnit("red_villager", 6, 5);
+        CreateUnit("red_archer", 7, 3);
+        CreateUnit("red_armor", 5, 4);
+        CreateUnit("red_warrior", 4, 5);
     }
 
     void Update()
@@ -229,8 +238,10 @@ public class GameController : MonoBehaviour
         ai.playAITurn();
         if (numberOfLoops > 1)
             StartCoroutine(playATurn(ai, numberOfLoops - 1));
-        else
-            StartBlueTurn();
+        else {
+            if (!isGameOver)
+                StartBlueTurn();
+        }
     }
 
     public bool isGameEnd() { return this.isGameOver; }
@@ -240,9 +251,15 @@ public class GameController : MonoBehaviour
         this.isGameOver = true;
 
         if (winner == Side.BLUE)
+        {
+            blueText.enabled = true;
             blueText.text = $"BLUE Wins!";
+        }
         else
+        {
+            redText.enabled = true;
             redText.text = $"RED Wins!";
+        }
 
     }
 

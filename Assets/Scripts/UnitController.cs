@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using PQ;
 using Side = GameController.Side;
 using Terrain = MapTile.Terrain;
 
@@ -220,7 +221,7 @@ public class UnitController : MonoBehaviour
         switch (unitType)
         {
             case UType.Villager:
-                move = 3;
+                move = 4;
                 range = 0;
                 break;
             case UType.Warrior:
@@ -276,37 +277,6 @@ public class UnitController : MonoBehaviour
 
             this.initMoveTiles();
         }
-
-
-        // Vector3 mousePos = Input.mousePosition;
-        // Vector2 worldPos = (Vector2)Camera.main.ScreenToWorldPoint(mousePos);
-
-        // if (col == Physics2D.OverlapPoint(worldPos) &&
-        //     !gC.isGameEnd() &&
-        //     gC.getCurPlayer() == this.side &&
-        //     this.state == State.READY &&
-        //     !this.isChosen)
-        //     {
-        //         Debug.Log($"{this.name} clicked");
-
-        //         this.isChosen = true;
-
-        //         this.destroyTiles("Both");
-        //         this.initMoveTiles();
-        //     }
-
-        // else {
-        //     Debug.Log($"{this.name} unclicked");
-        //     this.isChosen = false;
-        //     if (this.isMoved) {
-        //         Debug.Log("move destroy");
-        //         this.destroyTiles("MoveTile");
-        //     }
-        //     else {
-        //         Debug.Log("both destroy");
-        //         this.destroyTiles("Both");
-        //     }
-        // }
     }
 
     /// <summary> This function for AI use </summary>
@@ -335,85 +305,88 @@ public class UnitController : MonoBehaviour
         Vector2Int thisPos = new Vector2Int(this.x, this.y);
 
         mapCtrl.ResetVisit();
-        FloodFill(thisPos, this.move);
+        //FloodFill(thisPos, this.move);
+        //StartCoroutine(FloodFillCo(thisPos, this.move));
+
+
+
+        // TODO: TEST RED BLOB
+        FloodFill(thisPos);
+    }
+
+    void FloodFill(Vector2Int start) {
+        Dictionary<Vector2Int, float> costSoFar = new Dictionary<Vector2Int, float>();
+
+        drawMoveTile(start.x, start.y);
+
+
+
+        var frontier = new PriorityQueue<Vector2Int>();
+        frontier.Enqueue(start, 0);
+
+        costSoFar[start] = 0;
+
+        while (frontier.Count > 0)
+        {
+            Vector2Int current = frontier.Dequeue();
+
+            foreach (var next in GetNeighbors(current))
+            {
+                float newCost = costSoFar[current] + mapCtrl.GetTerrainCost(next);
+
+                // skip if this tile takes too much Move
+                if (newCost > this.move) {
+                    continue;
+                }
+
+
+                if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
+                {
+                    if (gC.GetUnitAt(next) == null)
+                        drawMoveTile(next.x, next.y);
+                    
+                    // visits Next, since it's possible
+                    costSoFar[next] = newCost;
+                    
+                    // get priority, which is TOTAL MOVE
+                    float priority = newCost; // + Heuristic(next, goal);
+                    
+                    // add to queue
+                    frontier.Enqueue(next, priority);
+                }
+            }
+        }
+
     }
 
 
-    private void FloodFill(Vector2Int pos, int moveRemaining)
-    {
-        int costOfTile = mapCtrl.GetTerrainCost(pos);
-
-        if (moveRemaining == 0 || moveRemaining < costOfTile || (mapCtrl.IsVisited(pos) && pos != this.GetPos()))
-            return;
-
-
-
-        if (gC.isValidPos(pos) &&
-            (gC.GetUnitAt(pos) == null || gC.GetUnitAt(pos) == this.gameObject))
-
-            drawMoveTile(pos.x, pos.y);
-
-        mapCtrl.Visit(pos.x, pos.y);
-
-        if (pos != new Vector2Int(this.x, this.y))
-            moveRemaining -= costOfTile;
-
+    public List<Vector2Int> GetNeighbors(Vector2Int pos) {
+        var neighbors = new List<Vector2Int>();
 
         Vector2Int posL = new Vector2Int(pos.x - 1, pos.y);
         Vector2Int posR = new Vector2Int(pos.x + 1, pos.y);
         Vector2Int posU = new Vector2Int(pos.x, pos.y + 1);
         Vector2Int posD = new Vector2Int(pos.x, pos.y - 1);
+        
+        GameObject unitL = gC.isValidPos(posL)? gC.GetUnitAt(posL) : null;
+        GameObject unitR = gC.isValidPos(posR)? gC.GetUnitAt(posR) : null;
+        GameObject unitU = gC.isValidPos(posU)? gC.GetUnitAt(posU) : null;
+        GameObject unitD = gC.isValidPos(posD)? gC.GetUnitAt(posD) : null;
 
-        Queue<Vector2Int> q = new Queue<Vector2Int>();
-        q.Enqueue(posL); q.Enqueue(posR); q.Enqueue(posU); q.Enqueue(posD);
+        if (gC.isValidPos(posL) && (!unitL || unitL.GetComponent<UnitController>().GetSide() == this.side))
+            neighbors.Add(new Vector2Int(pos.x - 1, pos.y));
+        
+        if (gC.isValidPos(posR) && (!unitR || unitR.GetComponent<UnitController>().GetSide() == this.side))
+            neighbors.Add(new Vector2Int(pos.x + 1, pos.y));
+        
+        if (gC.isValidPos(posU) && (!unitU || unitU.GetComponent<UnitController>().GetSide() == this.side))
+            neighbors.Add(new Vector2Int(pos.x, pos.y + 1));
 
-        while (q.Count > 0)
-        {
-            Vector2Int posToVisit = q.Dequeue();
+        if (gC.isValidPos(posD) && (!unitD || unitD.GetComponent<UnitController>().GetSide() == this.side))
+            neighbors.Add(new Vector2Int(pos.x, pos.y - 1));
 
-            if (gC.isValidPos(posToVisit) && !mapCtrl.IsVisited(posToVisit) &&
-               (gC.GetUnitAt(pos) == null || isSameSide(gC.GetUnitAt(pos).GetComponent<UnitController>())))
-            {
-                FloodFill(posToVisit, moveRemaining);
-            }
-        }
+        return neighbors;
     }
-
-    // private void drawMoveTiles()
-    // {
-    //     // TODO: CHANGE WITH FLOOD FILL!!!!
-
-    //     drawMoveTile(x, y);
-
-    //     for (int i = 1; i <= move; i++)
-    //     {
-    //         // draw left
-    //         if (gC.isValidPos(x - i, y) && gC.GetUnitAt(x - i, y) == null)
-    //             drawMoveTile(x - i, y);
-    //         // draw up
-    //         if (gC.isValidPos(x + i, y) && gC.GetUnitAt(x + i, y) == null)
-    //             drawMoveTile(x + i, y);
-    //         // draw right
-    //         if (gC.isValidPos(x, y + i) && gC.GetUnitAt(x, y + i) == null)
-    //             drawMoveTile(x, y + i);
-    //         // draw down
-    //         if (gC.isValidPos(x, y - i) && gC.GetUnitAt(x, y - i) == null)
-    //             drawMoveTile(x, y - i);
-
-    //         // draw diagonal left top
-    //         if (i >= 2 && gC.isValidPos(x - (i - 1), y + (i - 1)) && gC.GetUnitAt(x - (i - 1), y + (i - 1)) == null)
-    //             drawMoveTile(x - (i - 1), y + (i - 1));
-    //         // draw diagonal right top
-    //         if (i >= 2 && gC.isValidPos(x + (i - 1), y + (i - 1)) && gC.GetUnitAt(x + (i - 1), y + (i - 1)) == null)
-    //             drawMoveTile(x + (i - 1), y + (i - 1));
-    //         // draw diagonal left bot
-    //         if (i >= 2 && gC.isValidPos(x - (i - 1), y - (i - 1)) && gC.GetUnitAt(x - (i - 1), y - (i - 1)) == null)
-    //             drawMoveTile(x - (i - 1), y - (i - 1));
-    //         // draw diagonal right bot
-    //         if (i >= 2 && gC.isValidPos(x + (i - 1), y - (i - 1)) && gC.GetUnitAt(x + (i - 1), y - (i - 1)) == null)
-    //             drawMoveTile(x + (i - 1), y - (i - 1));
-    //     }
-    // }
 
     private void drawMoveTile(int x, int y)
     {

@@ -12,9 +12,9 @@ public class CombatController : MonoBehaviour
     // damage[attacker, defender] = float
     float[,] damage = new float[4, 4] {
         {  0,  0,  0,  0 },     // Villager
-        { 70, 50, 40, 70 },     // Warrior
-        { 60, 50, 30, 60 },     // Armor
-        { 60, 50, 20, 60 }      // Archer
+        { 50, 40, 40, 50 },     // Warrior
+        { 40, 45, 35, 45 },     // Armor
+        { 55, 50, 20, 55 }      // Archer
     };
 
     // -------------------------------------------

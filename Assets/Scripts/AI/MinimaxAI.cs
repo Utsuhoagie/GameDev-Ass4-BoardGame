@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using PQ;
 using UType = UnitController.UType;
 using Side = GameController.Side;
 using State = UnitController.State;
@@ -10,7 +11,7 @@ public class MinimaxAI : MonoBehaviour
 {
     public GameObject gameController;
     public GameObject combatController;
-    public GameObject mapCtrl;
+    public MapController mapCtrl;
 
     private Unit[,] stimulateBoard;
 
@@ -37,6 +38,7 @@ public class MinimaxAI : MonoBehaviour
 
         GameController gC = GameObject.FindWithTag("GameController").GetComponent<GameController>();
         GameObject[,] board = gC.getBoardPos();
+        mapCtrl = GameObject.FindWithTag("MapController").GetComponent<MapController>();
 
         for (int i = 0; i < 8; i++)
         {
@@ -83,6 +85,10 @@ public class MinimaxAI : MonoBehaviour
 
         // move the unit
         UnitController unitToMove = this.gameController.GetComponent<GameController>().getBoardPos()[bestMove.from[0], bestMove.from[1]].GetComponent<UnitController>();
+        
+        if (gC.isGameEnd())
+            return;
+        
         unitToMove.onAIMouseUp();
         unitToMove.clickMoveTile(bestMove.to[0], bestMove.to[1]);
         Debug.Log("AI move: " + bestMove.from[0] + ", " + bestMove.from[1] + " to " + bestMove.to[0] + ", " + bestMove.to[1]);
@@ -289,7 +295,7 @@ public class MinimaxAI : MonoBehaviour
                             int distanceToComponentBasePoint = (16 - distanceToComponentBase) * 10;
 
                             // priority to be in tiles that have bonus buff
-                            float def = mapCtrl.GetComponent<MapController>().GetTerrainDef(new Vector2Int(i, j));
+                            float def = mapCtrl.GetTerrainDef(new Vector2Int(i, j));
                             int defPoint = (int)((1 - def) * 20);
 
                             point -= board[i, j].HP + distanceToComponentBasePoint + defPoint;
@@ -301,7 +307,7 @@ public class MinimaxAI : MonoBehaviour
                             int distanceToComponentBasePoint = (16 - distanceToComponentBase) * 10;
 
                             // priority to be in tiles that have bonus buff
-                            float def = mapCtrl.GetComponent<MapController>().GetTerrainDef(new Vector2Int(i, j));
+                            float def = mapCtrl.GetTerrainDef(new Vector2Int(i, j));
                             int defPoint = (int)((1 - def) * 20);
 
                             point += board[i, j].HP + distanceToComponentBasePoint + defPoint;
@@ -353,84 +359,95 @@ public class MinimaxAI : MonoBehaviour
     {
         List<int[]> moveList = new List<int[]>();
 
-        FloodFill(new Vector2Int(x, y), board[x, y].move, moveList, new Vector2Int(x, y), board);
-
-        // moveList.Add(new int[] { x, y });
-        // for (int i = 1; i <= board[x, y].move; i++)
-        // {
-        //     // draw left
-        //     if (this.isValidPos(board, x - i, y) && board[x - i, y] == null)
-        //         moveList.Add(new int[] { x - i, y });
-        //     // draw up
-        //     if (this.isValidPos(board, x + i, y) && board[x + i, y] == null)
-        //         moveList.Add(new int[] { x + i, y });
-        //     // draw right
-        //     if (this.isValidPos(board, x, y + i) && board[x, y + i] == null)
-        //         moveList.Add(new int[] { x, y + i });
-        //     // draw down
-        //     if (this.isValidPos(board, x, y - i) && board[x, y - i] == null)
-        //         moveList.Add(new int[] { x, y - i });
-
-        //     // draw diagonal left top
-        //     if (i >= 2 && this.isValidPos(board, x - (i - 1), y + (i - 1)) && board[x - (i - 1), y + (i - 1)] == null)
-        //         moveList.Add(new int[] { x - (i - 1), y + (i - 1) });
-        //     // draw diagonal right top
-        //     if (i >= 2 && this.isValidPos(board, x + (i - 1), y + (i - 1)) && board[x + (i - 1), y + (i - 1)] == null)
-        //         moveList.Add(new int[] { x + (i - 1), y + (i - 1) });
-        //     // draw diagonal left bot
-        //     if (i >= 2 && this.isValidPos(board, x - (i - 1), y - (i - 1)) && board[x - (i - 1), y - (i - 1)] == null)
-        //         moveList.Add(new int[] { x - (i - 1), y - (i - 1) });
-        //     // draw diagonal right bot
-        //     if (i >= 2 && this.isValidPos(board, x + (i - 1), y - (i - 1)) && board[x + (i - 1), y - (i - 1)] == null)
-        //         moveList.Add(new int[] { x + (i - 1), y - (i - 1) });
-        // }
+        FloodFill(new Vector2Int(x, y), board[x, y].move, moveList, board);
 
         return moveList;
     }
 
-    private void FloodFill(Vector2Int pos, int moveRemaining, List<int[]> moveList, Vector2Int originPos, Unit[,] board)
+    private void FloodFill(Vector2Int start, int moveMax, List<int[]> moveList, Unit[,] board)
     {
-        int costOfTile = mapCtrl.GetComponent<MapController>().GetTerrainCost(pos);
+        Dictionary<Vector2Int, float> costSoFar = new Dictionary<Vector2Int, float>();
 
-        if (moveRemaining == 0 || moveRemaining < costOfTile || (moveList.Contains(new int[] { pos.x, pos.y }) && pos != originPos))
-            return;
-
+        moveList.Add(new int[] { start.x, start.y });
 
 
-        if (this.isValidPos(board, pos.x, pos.y) &&
-            (board[pos.x, pos.y] == null || pos == originPos))
 
-            moveList.Add(new int[] { pos.x, pos.y });
+        var frontier = new PriorityQueue<Vector2Int>();
+        frontier.Enqueue(start, 0);
 
-        // mapCtrl.Visit(pos.x, pos.y);
+        costSoFar[start] = 0;
 
-        if (pos != originPos)
-            moveRemaining -= costOfTile;
+        while (frontier.Count > 0)
+        {
+            Vector2Int current = frontier.Dequeue();
 
+            foreach (var next in GetNeighbors(current, board))
+            {
+                float newCost = costSoFar[current] + mapCtrl.GetTerrainCost(next);
+
+                // skip if this tile takes too much Move
+                if (newCost > moveMax) {
+                    continue;
+                }
+
+
+                if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
+                {
+                    if (board[next.x, next.y] == null)
+                        moveList.Add(new int[] { next.x, next.y });
+                    
+                    // visits Next, since it's possible
+                    costSoFar[next] = newCost;
+                    
+                    // get priority, which is TOTAL MOVE
+                    float priority = newCost; // + Heuristic(next, goal);
+                    
+                    // add to queue
+                    frontier.Enqueue(next, priority);
+                }
+            }
+        }        
+    }
+
+    public List<Vector2Int> GetNeighbors(Vector2Int pos, Unit[,] board) {
+        var neighbors = new List<Vector2Int>();
 
         Vector2Int posL = new Vector2Int(pos.x - 1, pos.y);
         Vector2Int posR = new Vector2Int(pos.x + 1, pos.y);
         Vector2Int posU = new Vector2Int(pos.x, pos.y + 1);
         Vector2Int posD = new Vector2Int(pos.x, pos.y - 1);
+        
+        Unit unitL = isValidPos(board, posL)? board[posL.x, posL.y] : null;
+        Unit unitR = isValidPos(board, posR)? board[posR.x, posR.y] : null;
+        Unit unitU = isValidPos(board, posU)? board[posU.x, posU.y] : null;
+        Unit unitD = isValidPos(board, posD)? board[posD.x, posD.y] : null;
 
-        Queue<Vector2Int> q = new Queue<Vector2Int>();
-        q.Enqueue(posL); q.Enqueue(posR); q.Enqueue(posU); q.Enqueue(posD);
+        if (isValidPos(board, posL) && (unitL == null || unitL.side == Side.RED))
+            neighbors.Add(new Vector2Int(pos.x - 1, pos.y));
+        
+        if (isValidPos(board, posR) && (unitR == null || unitR.side == Side.RED))
+            neighbors.Add(new Vector2Int(pos.x + 1, pos.y));
+        
+        if (isValidPos(board, posU) && (unitU == null || unitU.side == Side.RED))
+            neighbors.Add(new Vector2Int(pos.x, pos.y + 1));
 
-        while (q.Count > 0)
-        {
-            Vector2Int posToVisit = q.Dequeue();
+        if (isValidPos(board, posD) && (unitD == null || unitD.side == Side.RED))
+            neighbors.Add(new Vector2Int(pos.x, pos.y - 1));
 
-            if (isValidPos(board, posToVisit.x, posToVisit.y) && !moveList.Contains(new int[] { posToVisit.x, posToVisit.y }) &&
-               (board[pos.x, pos.y] == null || board[originPos.x, originPos.y].isSameSide(board[pos.x, pos.y])))
-            {
-                FloodFill(posToVisit, moveRemaining, moveList, originPos, board);
-            }
-        }
+        return neighbors;
     }
 
     private bool isValidPos(Unit[,] board, int x, int y)
     {
         if (x < 0 || x >= 8 || y < 0 || y >= 8)
+            return false;
+
+        return true;
+    }
+
+    private bool isValidPos(Unit[,] board, Vector2Int pos)
+    {
+        if (pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8)
             return false;
 
         return true;
