@@ -9,6 +9,13 @@ TagManager:
   - MoveTile
   - AtkTile
   - CombatController
+  - MainTilemap
+  - MapController
+  - AI
+  - InputModule
+  - BlueBtn
+  - RedBtn
+  - PauseMenu
   layers:
   - Default
   - TransparentFX

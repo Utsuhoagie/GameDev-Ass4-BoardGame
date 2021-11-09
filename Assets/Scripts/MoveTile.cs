@@ -13,31 +13,35 @@ public class MoveTile : MonoBehaviour
     GameObject unit;    // which unit "owns" this movable tile
     UnitController uC;
 
-    int x;
-    int y;
+    public int x;
+    public int y;
 
     // --- Getters & Setters -------------------
     public GameObject getCurrentlyUnitInUsed() { return unit; }
-    public void setUnitOwnMoveTile(GameObject obj) {
+    public void setUnitOwnMoveTile(GameObject obj)
+    {
         unit = obj;
         uC = unit.GetComponent<UnitController>();
     }
 
     //--------------------------------------
     // Awake is called FIRST
-    void Awake() {
+    void Awake()
+    {
         game = GameObject.FindWithTag("GameController");
         gC = game.GetComponent<GameController>();
     }
 
-    void Start() {}
+    void Start() { }
 
-    void Update() {}
+    void Update() { }
 
     //-----------------------------------------
 
     public void OnMouseUp()
     {
+        if (PauseController.isPaused) return;
+
         // TODO:
         // if (this.isAttack)
         // {
@@ -59,10 +63,10 @@ public class MoveTile : MonoBehaviour
 
         gC.SetUnitAt(x, y, this.unit);
 
-        gC.SetAllState(uC.GetSide(), State.END);
+        //gC.SetAllState(uC.GetSide(), State.END);
         uC.SetState(State.MOVED);
 
-        
+
     }
 
 
