@@ -4,26 +4,32 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+
 using State = UnitController.State;
+using GameMode = Mode.GameMode;
 
 public class GameController : MonoBehaviour
 {
     // References
     Text blueText;
     Text redText;
+    Button blueBtn;
+    Button redBtn;
 
     // Turn
     public enum Side { BLUE, RED }
     [SerializeField] private Side curPlayer;
     bool isGameOver = false;
 
+    // AI
+    GameMode gameMode;
+    MinimaxAI ai;
 
     GameObject[,] boardPos = new GameObject[8, 8];
     List<GameObject> blueUnits = new List<GameObject>();
     List<GameObject> redUnits = new List<GameObject>();
-
-
     public GameObject unitPrefab;
+
 
     // --- Getters & Setters ------------------
     public GameObject GetUnitAt(int x, int y) { return boardPos[x, y]; }
@@ -61,6 +67,8 @@ public class GameController : MonoBehaviour
 
     public Side getCurPlayer() { return this.curPlayer; }
 
+    public bool isAI() { return ai != null; }
+
     public GameObject[,] getBoardPos()
     {
         return this.boardPos;
@@ -71,6 +79,15 @@ public class GameController : MonoBehaviour
     void Awake()
     {
         curPlayer = Side.BLUE;
+        
+        gameMode = Mode.mode;
+
+        if (gameMode == GameMode.AI || gameMode == GameMode.AIHard)
+        {
+            ai = GameObject.FindWithTag("AI").GetComponent<MinimaxAI>();
+            GameObject.FindWithTag("RedBtn").SetActive(false);
+        }
+
         blueText = GameObject.FindWithTag("BlueText").GetComponent<Text>();
         redText = GameObject.FindWithTag("RedText").GetComponent<Text>();
     }
@@ -192,11 +209,10 @@ public class GameController : MonoBehaviour
 
             SetAllState(Side.RED, State.READY);
 
-
-            GameObject AI = GameObject.FindWithTag("AI");
-            MinimaxAI ai = AI.GetComponent<MinimaxAI>();
-            int numOfUnits = this.redUnits.Count;
-            StartCoroutine(playATurn(ai, numOfUnits));
+            if (gameMode == GameMode.AIHard) {
+                int numOfUnits = this.redUnits.Count;
+                StartCoroutine(playATurn(ai, numOfUnits));
+            }
         }
     }
 

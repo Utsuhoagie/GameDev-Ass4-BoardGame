@@ -40,6 +40,8 @@ public class MoveTile : MonoBehaviour
 
     public void OnMouseUp()
     {
+        if (PauseController.isPaused) return;
+
         // TODO:
         // if (this.isAttack)
         // {
