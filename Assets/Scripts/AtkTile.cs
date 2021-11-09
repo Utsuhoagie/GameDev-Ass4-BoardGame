@@ -40,6 +40,8 @@ public class AtkTile : MonoBehaviour
 
     public void OnMouseUp()
     {
+        if (PauseController.isPaused) return;
+
         // TODO:
         // combat
 

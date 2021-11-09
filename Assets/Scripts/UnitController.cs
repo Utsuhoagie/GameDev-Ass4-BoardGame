@@ -265,6 +265,9 @@ public class UnitController : MonoBehaviour
 
     private void OnMouseUp()
     {
+        if (PauseController.isPaused ||
+            (side == Side.RED && gC.isAI())) return;
+
         if (!gC.isGameEnd() &&
             gC.getCurPlayer() == this.side &&
             this.state == State.READY)

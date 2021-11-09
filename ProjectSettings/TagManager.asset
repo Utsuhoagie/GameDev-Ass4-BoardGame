@@ -13,6 +13,9 @@ TagManager:
   - MapController
   - AI
   - InputModule
+  - BlueBtn
+  - RedBtn
+  - PauseMenu
   layers:
   - Default
   - TransparentFX
