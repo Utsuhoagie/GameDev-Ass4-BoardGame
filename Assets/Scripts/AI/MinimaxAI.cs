@@ -17,6 +17,8 @@ public class MinimaxAI : MonoBehaviour
     private Side AISide = Side.RED;
     private Side PlayerSide = Side.BLUE;
 
+    public bool isHardAI = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -252,24 +254,61 @@ public class MinimaxAI : MonoBehaviour
     {
         int point = 0;
 
-        // calculate point for each side
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
+        if (!this.isHardAI)
+
+            // calculate point for each side
+            for (int i = 0; i < 8; i++)
             {
-                if (board[i, j] != null)
+                for (int j = 0; j < 8; j++)
                 {
-                    if (board[i, j].side == this.PlayerSide)
+                    if (board[i, j] != null)
                     {
-                        point -= board[i, j].HP;
-                    }
-                    else
-                    {
-                        point += board[i, j].HP;
+                        if (board[i, j].side == this.PlayerSide)
+                        {
+                            point -= board[i, j].HP;
+                        }
+                        else
+                        {
+                            point += board[i, j].HP;
+                        }
                     }
                 }
             }
-        }
+
+        else
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (board[i, j] != null)
+                    {
+                        if (board[i, j].side == this.PlayerSide)
+                        {
+                            //TODO: this can make the UNIT locked if have unmovable tile (use path finding instead)
+                            int distanceToComponentBase = Mathf.Abs(i - 7) + Mathf.Abs(j - 0);
+                            int distanceToComponentBasePoint = (16 - distanceToComponentBase) * 10;
+
+                            // priority to be in tiles that have bonus buff
+                            float def = mapCtrl.GetComponent<MapController>().GetTerrainDef(new Vector2Int(i, j));
+                            int defPoint = (int)((1 - def) * 20);
+
+                            point -= board[i, j].HP + distanceToComponentBasePoint + defPoint;
+                        }
+                        else
+                        {
+                            //TODO: this can make the UNIT locked if have unmovable tile (use path finding instead)
+                            int distanceToComponentBase = Mathf.Abs(i - 0) + Mathf.Abs(j - 7);
+                            int distanceToComponentBasePoint = (16 - distanceToComponentBase) * 10;
+
+                            // priority to be in tiles that have bonus buff
+                            float def = mapCtrl.GetComponent<MapController>().GetTerrainDef(new Vector2Int(i, j));
+                            int defPoint = (int)((1 - def) * 20);
+
+                            point += board[i, j].HP + distanceToComponentBasePoint + defPoint;
+                        }
+                    }
+                }
+            }
 
         return point;
     }

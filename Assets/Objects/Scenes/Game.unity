@@ -152,6 +152,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameController: {fileID: 704320480}
   combatController: {fileID: 1334148334}
+  mapCtrl: {fileID: 814955374}
+  isHardAI: 1
 --- !u!4 &49386995
 Transform:
   m_ObjectHideFlags: 0
